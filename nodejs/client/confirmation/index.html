@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirmation</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+
+  <body>
+    <!-- Step 4: confirm the booking and show it -->
+    <p id="status">Confirming your booking…</p>
+
+    <dl id="booking" hidden>
+      <dt>Reference</dt>
+      <dd id="reference"></dd>
+      <dt>Date</dt>
+      <dd id="date"></dd>
+      <dt>Seats</dt>
+      <dd id="seats"></dd>
+      <dt>Total</dt>
+      <dd id="total"></dd>
+      <dt>Tickets sent to</dt>
+      <dd id="email"></dd>
+    </dl>
+
+    <p><a id="tickets" hidden>Download tickets (PDF)</a></p>
+
+    <p><a href="/events/">Back to events</a></p>
+
+    <script type="module" src="./confirmation.js"></script>
+  </body>
+</html>
