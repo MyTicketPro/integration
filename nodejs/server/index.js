@@ -18,10 +18,10 @@ app.get('/api/booking/:uuid', getBooking);  // shows the result
 // Every failure, ours or MyTicketPro's, reaches the browser
 // as { error, errorMessage }.
 app.use('/api', function (err, req, res, next) {
-  res.status(err.status ?? 500).json({
-    error: err.code,
-    errorMessage: err.message,
-  });
+    res.status(err.status ?? 500).json({
+        error: err.code,
+        errorMessage: err.message,
+    });
 });
 
 // The pages: plain HTML, CSS and JavaScript files, sent as they are.
@@ -29,5 +29,5 @@ app.use(express.static('client'));
 
 const port = process.env.PORT ?? 3000;
 app.listen(port, function () {
-  console.log(`Open http://localhost:${port}`);
+    console.log(`Open http://localhost:${port}`);
 });

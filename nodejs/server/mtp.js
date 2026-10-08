@@ -5,29 +5,29 @@ const MTP_API   = process.env.MTP_API || 'https://api.sandbox.myticketpro.app/oc
 const MTP_TOKEN = process.env.MTP_TOKEN;
 
 export async function mtp(method, path, body) {
-  if (!MTP_TOKEN) {
-    throw new Error('MTP_TOKEN is not set. Copy .env.example to .env and add your sandbox token.');
-  }
+    if (!MTP_TOKEN) {
+        throw new Error('MTP_TOKEN is not set. Copy .env.example to .env and add your sandbox token.');
+    }
 
-  const response = await fetch(MTP_API + path, {
-    method,
-    headers: {
-      'Authorization'     : `Bearer ${MTP_TOKEN}`,
-      'Content-Type'      : 'application/json',
-      'Octo-Capabilities' : 'octo/pricing, octo/widget',
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+    const response = await fetch(MTP_API + path, {
+        method,
+        headers: {
+            'Authorization'     : `Bearer ${MTP_TOKEN}`,
+            'Content-Type'      : 'application/json',
+            'Octo-Capabilities' : 'octo/pricing, octo/widget',
+        },
+        body: body ? JSON.stringify(body) : undefined,
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  // MyTicketPro answers errors with { error, errorMessage }.
-  if (!response.ok) {
-    const error = new Error(data.errorMessage);
-    error.code = data.error;
-    error.status = response.status;
-    throw error;
-  }
+    // MyTicketPro answers errors with { error, errorMessage }.
+    if (!response.ok) {
+        const error = new Error(data.errorMessage);
+        error.code = data.error;
+        error.status = response.status;
+        throw error;
+    }
 
-  return data;
+    return data;
 }

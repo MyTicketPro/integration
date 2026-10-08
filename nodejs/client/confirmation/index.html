@@ -1,62 +1,62 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Confirmation</title>
-    <link rel="stylesheet" href="/style.css" />
-  </head>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Confirmation</title>
+        <link rel="stylesheet" href="/style.css" />
+    </head>
 
-  <body>
-    <header>
-      <strong>Demo Shop</strong>
-      <span>MyTicketPro widget example</span>
-    </header>
+    <body>
+        <header>
+            <strong>Demo Shop</strong>
+            <span>MyTicketPro widget example</span>
+        </header>
 
-    <main>
-      <ol class="steps">
-        <li>1. Date</li>
-        <li>2. Seats</li>
-        <li>3. Checkout</li>
-        <li class="current">4. Done</li>
-      </ol>
+        <main>
+            <ol class="steps">
+                <li>1. Date</li>
+                <li>2. Seats</li>
+                <li>3. Checkout</li>
+                <li class="current">4. Done</li>
+            </ol>
 
-      <div class="dev">
-        <ol>
-          <li>The booking was confirmed on the seats page (<a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#confirm" target="_blank">guide step 3c</a>). MyTicketPro emails the tickets.</li>
-          <li><code>seats.js</code> then opened this page with the booking uuid in the URL.</li>
-          <li><code>confirmation.js</code> asked our server for the booking (<code>GET /api/booking/{uuid}</code>).</li>
-          <li><code>server/routes/booking.js</code> called <code>GET /octo/bookings/{uuid}</code>.</li>
-        </ol>
-      </div>
+            <div class="dev">
+                <ol>
+                    <li>The booking was confirmed on the seats page (<a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#confirm" target="_blank">guide step 3c</a>). MyTicketPro emails the tickets.</li>
+                    <li><code>seats.js</code> then opened this page with the booking uuid in the URL.</li>
+                    <li><code>confirmation.js</code> asked our server for the booking (<code>GET /api/booking/{uuid}</code>).</li>
+                    <li><code>server/routes/booking.js</code> called <code>GET /octo/bookings/{uuid}</code>.</li>
+                </ol>
+            </div>
 
-      <div class="card card-padded">
-        <p id="status">Loading your booking…</p>
+            <div class="card card-padded">
+                <p id="status">Loading your booking…</p>
 
-        <div id="booking" hidden>
-          <span class="badge">Confirmed</span>
-          <h1>You're going!</h1>
+                <div id="booking" hidden>
+                    <span class="badge">Confirmed</span>
+                    <h1>You're going!</h1>
 
-          <dl>
-            <dt>Reference</dt>
-            <dd id="reference"></dd>
-            <dt>Date</dt>
-            <dd id="date"></dd>
-            <dt>Seats</dt>
-            <dd id="seats"></dd>
-            <dt>Total</dt>
-            <dd id="total"></dd>
-            <dt>Tickets sent to</dt>
-            <dd id="email"></dd>
-          </dl>
+                    <dl>
+                        <dt>Reference</dt>
+                        <dd id="reference"></dd>
+                        <dt>Date</dt>
+                        <dd id="date"></dd>
+                        <dt>Seats</dt>
+                        <dd id="seats"></dd>
+                        <dt>Total</dt>
+                        <dd id="total"></dd>
+                        <dt>Tickets sent to</dt>
+                        <dd id="email"></dd>
+                    </dl>
 
-          <p><a id="tickets" hidden>Download tickets (PDF)</a></p>
-        </div>
+                    <p><a id="tickets" hidden>Download tickets (PDF)</a></p>
+                </div>
 
-        <p><a href="/events/">Back to events</a></p>
-      </div>
-    </main>
+                <p><a href="/events/">Back to events</a></p>
+            </div>
+        </main>
 
-    <script type="module" src="./confirmation.js"></script>
-  </body>
+        <script type="module" src="./confirmation.js"></script>
+    </body>
 </html>

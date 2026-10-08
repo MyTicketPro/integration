@@ -1,5 +1,5 @@
 // The seats page, in three steps:
-//   1. createWidget     asks our server for a widget and shows it
+//   1. createWidget       asks our server for a widget and shows it
 //   2. onWidgetMessage()  follows what the shopper does in the widget
 //   3. confirmBooking()   confirms the booking when the form is sent
 

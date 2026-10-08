@@ -1,39 +1,39 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Choose a date</title>
-    <link rel="stylesheet" href="/style.css" />
-  </head>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Choose a date</title>
+        <link rel="stylesheet" href="/style.css" />
+    </head>
 
-  <body>
-    <header>
-      <strong>Demo Shop</strong>
-      <span>MyTicketPro widget example</span>
-    </header>
+    <body>
+        <header>
+            <strong>Demo Shop</strong>
+            <span>MyTicketPro widget example</span>
+        </header>
 
-    <main>
-      <ol class="steps">
-        <li class="current">1. Date</li>
-        <li>2. Seats</li>
-        <li>3. Checkout</li>
-        <li>4. Done</li>
-      </ol>
+        <main>
+            <ol class="steps">
+                <li class="current">1. Date</li>
+                <li>2. Seats</li>
+                <li>3. Checkout</li>
+                <li>4. Done</li>
+            </ol>
 
-      <div class="dev">
-        <ol>
-          <li><code>events.js</code> asked our server for the events (<code>GET /api/events</code>).</li>
-          <li><code>server/routes/events.js</code> called <code>GET /octo/products</code> (<a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#product" target="_blank">guide step 1a</a>).</li>
-          <li>For each product, it called <code>POST /octo/availability</code> (<a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#availability" target="_blank">guide step 1b</a>).</li>
-          <li>Each date links to <code>/seats/</code> with its <code>productId</code> and <code>availabilityId</code>.</li>
-        </ol>
-      </div>
+            <div class="dev">
+                <ol>
+                    <li><code>events.js</code> asked our server for the events (<code>GET /api/events</code>).</li>
+                    <li><code>server/routes/events.js</code> called <code>GET /octo/products</code> (<a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#product" target="_blank">guide step 1a</a>).</li>
+                    <li>For each product, it called <code>POST /octo/availability</code> (<a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#availability" target="_blank">guide step 1b</a>).</li>
+                    <li>Each date links to <code>/seats/</code> with its <code>productId</code> and <code>availabilityId</code>.</li>
+                </ol>
+            </div>
 
-      <h1>Choose a date</h1>
-      <div id="events">Loading events…</div>
-    </main>
+            <h1>Choose a date</h1>
+            <div id="events">Loading events…</div>
+        </main>
 
-    <script type="module" src="./events.js"></script>
-  </body>
+        <script type="module" src="./events.js"></script>
+    </body>
 </html>
