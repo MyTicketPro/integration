@@ -1,59 +1,33 @@
-// Starts the Express server, mounts the three API routes and serves the pages.
+// Starts the Express server, mounts the API routes and serves the pages.
 import express from 'express';
 
-import { MtpApi } from './mtpApi.js';
 import { listEvents } from './routes/events.js';
 import { createWidget } from './routes/widget.js';
 import { confirmBooking } from './routes/confirm.js';
-
-// One API client for the whole server, built from the .env file.
-const mtpApi = new MtpApi({
-  token  : process.env.MTP_TOKEN,
-  baseUrl: process.env.MTP_API || 'https://api.sandbox.mtpApi.app/octo',
-});
+import { getBooking } from './routes/booking.js';
 
 const app = express();
 app.use(express.json());
 
-// The three API routes. Each one gets the API client passed in.
-app.get('/api/events', (req, res) => {
-  return listEvents(mtpApi, req, res);
-});
-
-app.post('/api/widget', (req, res) => {
-  return createWidget(mtpApi, req, res);
-});
-
-app.post('/api/confirm', (req, res) => {
-  return confirmBooking(mtpApi, req, res);
-});
+// The API routes, with the guide steps they cover.
+app.get('/api/events', listEvents);         // steps 1a, 1b
+app.post('/api/widget', createWidget);      // step 1c
+app.post('/api/confirm', confirmBooking);   // steps 3a, 3c
+app.get('/api/booking/:uuid', getBooking);  // shows the result
 
 // Every failure, ours or MyTicketPro's, reaches the browser
 // as { error, errorMessage }.
-app.use('/api', (err, req, res, next) => {
-  const status = err.status ?? 500;
-  const body = {
-    error: err.code ?? 'ERROR',
+app.use('/api', function (err, req, res, next) {
+  res.status(err.status ?? 500).json({
+    error: err.code,
     errorMessage: err.message,
-  };
-
-  res.status(status).json(body);
+  });
 });
 
-// The pages: the built files in production,
-// Vite (with live reload) in development.
-if (process.argv.includes('--production')) {
-  app.use(express.static('dist'));
-} else {
-  const { createServer } = await import('vite');
-  const vite = await createServer({
-    server: { middlewareMode: true },
-  });
-
-  app.use(vite.middlewares);
-}
+// The pages: plain HTML, CSS and JavaScript files, sent as they are.
+app.use(express.static('client'));
 
 const port = process.env.PORT ?? 3000;
-app.listen(port, () => {
+app.listen(port, function () {
   console.log(`Open http://localhost:${port}`);
 });

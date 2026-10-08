@@ -2,16 +2,11 @@
   "name": "myticketpro-widget-example",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20.19" },
+  "engines": { "node": ">=22" },
   "scripts": {
-    "dev": "node --watch-path=server --env-file=.env server/index.js",
-    "build": "vite build",
-    "start": "node --env-file=.env server/index.js --production"
+    "start": "node --watch --env-file=.env server/index.js"
   },
   "dependencies": {
     "express": "^5.2.1"
-  },
-  "devDependencies": {
-    "vite": "^8.3.3"
   }
 }

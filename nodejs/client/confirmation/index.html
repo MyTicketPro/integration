@@ -8,25 +8,54 @@
   </head>
 
   <body>
-    <!-- Step 4: confirm the booking and show it -->
-    <p id="status">Confirming your booking…</p>
+    <header>
+      <strong>Demo Shop</strong>
+      <span>MyTicketPro widget example</span>
+    </header>
 
-    <dl id="booking" hidden>
-      <dt>Reference</dt>
-      <dd id="reference"></dd>
-      <dt>Date</dt>
-      <dd id="date"></dd>
-      <dt>Seats</dt>
-      <dd id="seats"></dd>
-      <dt>Total</dt>
-      <dd id="total"></dd>
-      <dt>Tickets sent to</dt>
-      <dd id="email"></dd>
-    </dl>
+    <main>
+      <ol class="steps">
+        <li>1. Date</li>
+        <li>2. Seats</li>
+        <li>3. Checkout</li>
+        <li class="current">4. Done</li>
+      </ol>
 
-    <p><a id="tickets" hidden>Download tickets (PDF)</a></p>
+      <div class="dev">
+        <ol>
+          <li>The booking was confirmed on the seats page (<a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#confirm" target="_blank">guide step 3c</a>). MyTicketPro emails the tickets.</li>
+          <li><code>seats.js</code> then opened this page with the booking uuid in the URL.</li>
+          <li><code>confirmation.js</code> asked our server for the booking (<code>GET /api/booking/{uuid}</code>).</li>
+          <li><code>server/routes/booking.js</code> called <code>GET /octo/bookings/{uuid}</code>.</li>
+        </ol>
+      </div>
 
-    <p><a href="/events/">Back to events</a></p>
+      <div class="card card-padded">
+        <p id="status">Loading your booking…</p>
+
+        <div id="booking" hidden>
+          <span class="badge">Confirmed</span>
+          <h1>You're going!</h1>
+
+          <dl>
+            <dt>Reference</dt>
+            <dd id="reference"></dd>
+            <dt>Date</dt>
+            <dd id="date"></dd>
+            <dt>Seats</dt>
+            <dd id="seats"></dd>
+            <dt>Total</dt>
+            <dd id="total"></dd>
+            <dt>Tickets sent to</dt>
+            <dd id="email"></dd>
+          </dl>
+
+          <p><a id="tickets" hidden>Download tickets (PDF)</a></p>
+        </div>
+
+        <p><a href="/events/">Back to events</a></p>
+      </div>
+    </main>
 
     <script type="module" src="./confirmation.js"></script>
   </body>

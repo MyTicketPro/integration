@@ -8,18 +8,47 @@
   </head>
 
   <body>
-    <!-- Step 1: the home page, explaining what the example shows -->
+    <header>
+      <strong>Demo MTP event widget</strong>
+      <span>MyTicketPro widget example</span>
+    </header>
 
-    <h1>MyTicketPro widget example</h1>
-    <p>A minimal shop that sells tickets through the MyTicketPro widget:</p>
+    <main>
+      <h1>MyTicketPro widget example</h1>
+      <p>A small shop that sells tickets through the MyTicketPro widget. Each page is one step:</p>
 
-    <ol>
-      <li>This page.</li>
-      <li>List events and their dates.</li>
-      <li>Pick seats in the widget, MyTicketPro holds them.</li>
-      <li>Enter contact details and confirm the booking.</li>
-    </ol>
+      <table>
+        <tr>
+          <th>Page</th>
+          <th>What the shopper does</th>
+          <th>Browser file</th>
+          <th>Server file</th>
+          <th><a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto" target="_blank">Guide</a> step</th>
+        </tr>
+        <tr>
+          <td><code>/events/</code></td>
+          <td>Picks an event date</td>
+          <td><code>client/events/events.js</code></td>
+          <td><code>server/routes/events.js</code></td>
+          <td><a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#product" target="_blank">1a</a>, <a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#availability" target="_blank">1b</a></td>
+        </tr>
+        <tr>
+          <td><code>/seats/</code></td>
+          <td>Picks seats in the widget, then enters contact details and confirms</td>
+          <td><code>client/seats/seats.js</code></td>
+          <td><code>server/routes/widget.js</code>, <code>server/routes/confirm.js</code></td>
+          <td><a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#create" target="_blank">1c</a>, <a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#embed" target="_blank">2</a>, <a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#result" target="_blank">3a</a>, <a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#confirm" target="_blank">3c</a></td>
+        </tr>
+        <tr>
+          <td><code>/confirmation/</code></td>
+          <td>Sees the confirmed booking</td>
+          <td><code>client/confirmation/confirmation.js</code></td>
+          <td><code>server/routes/booking.js</code></td>
+          <td></td>
+        </tr>
+      </table>
 
-    <p><a href="/events/">Browse events</a></p>
+      <p><a class="button" href="/events/">Pick an event</a></p>
+    </main>
   </body>
 </html>

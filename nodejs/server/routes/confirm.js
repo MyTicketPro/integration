@@ -1,60 +1,45 @@
-// Step 4: confirm the booking that the widget is holding.
-export async function confirmBooking(mtpApi, req, res) {
-  const { uuid, contact = {} } = req.body;
+// Guide steps 3a and 3c: read the widget, then confirm the booking
+// it is holding.
+import { mtp } from '../mtp.js';
 
-  // The browser only says which widget. Seats and price are re-read
-  // from MyTicketPro, because anything the browser sends can be edited.
-  const widget = await mtpApi.getWidget(uuid);
+export async function confirmBooking(req, res) {
+  const uuid = req.body.uuid;
+  const contact = req.body.contact;
+
+  // Step 3a: read the widget from MyTicketPro. Never trust seats or prices
+  // sent by the browser, because anyone can edit them.
+  const widget = await mtp('GET', `/widgets/${uuid}`);
   const booking = widget.booking;
 
-  if (widget.status !== 'COMPLETED' || !booking) {
-    res.status(409).json({
-      error: 'NOT_COMPLETED',
-      errorMessage: 'No seats were selected for this widget.',
-    });
+  if (widget.status !== 'COMPLETED') {
+    res.status(409).json({ errorMessage: 'No seats were selected for this widget.' });
     return;
   }
 
-  // The page was reloaded after confirming: show the same booking again.
+  // A reload or double click sends confirm again; answer with the booking.
   if (booking.status === 'CONFIRMED') {
     res.json(booking);
     return;
   }
 
-  if (isExpired(booking)) {
-    res.status(410).json({
-      error: 'HOLD_EXPIRED',
-      errorMessage: 'Your seats were released because the hold expired.',
-    });
+  // The seats are held until booking.utcExpiresAt (15 minutes by default).
+  if (booking.status !== 'ON_HOLD' || new Date(booking.utcExpiresAt) < new Date()) {
+    res.status(410).json({ errorMessage: 'Your seats were released. Please pick them again.' });
     return;
   }
 
   // A real shop charges booking.pricing.retail here, before confirming.
 
-  // Pass on only the contact fields MyTicketPro needs.
-  const confirmed = await mtpApi.confirmBooking(booking.uuid, {
+  // Step 3c: confirm. The tickets are emailed to emailAddress.
+  const confirmed = await mtp('POST', `/bookings/${booking.uuid}/confirm`, {
+    resellerReference: `example-${uuid}`,
     contact: {
       firstName: contact.firstName,
       lastName: contact.lastName,
       emailAddress: contact.emailAddress,
       phoneNumber: contact.phoneNumber,
-      country: contact.country,
     },
-    resellerReference: `example-${uuid}`,
   });
 
   res.json(confirmed);
-}
-
-// A held booking stops being confirmable when its hold time runs out.
-function isExpired(booking) {
-  if (booking.status !== 'ON_HOLD') {
-    return true;
-  }
-
-  if (!booking.utcExpiresAt) {
-    return false;
-  }
-
-  return new Date(booking.utcExpiresAt) < new Date();
 }
