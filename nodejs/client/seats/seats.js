@@ -1,13 +1,13 @@
 // The seats page, in three steps:
-//   1. createWidget       asks our server for a widget and shows it
-//   2. onWidgetMessage()  follows what the shopper does in the widget
-//   3. confirmBooking()   confirms the booking when the form is sent
+//   Step 1: create the widget and show it   (showWidget)
+//   Step 2: follow what the shopper does    (onWidgetMessage)
+//   Step 3: confirm the booking             (confirmBooking)
 
 // The events page put the chosen product and date in the URL.
 const params = new URLSearchParams(location.search);
 
 
-// Step 1: createWidget
+// Step 1: create the widget and show it (guide steps 1c and 2).
 
 let widget;
 // Our server creates the widget. Only the server holds the API token.
@@ -42,7 +42,7 @@ function showWidget(data) {
 }
 
 
-// 2. The widget sends this page messages (guide step 2).
+// Step 2: the widget sends this page messages (guide step 2).
 function onWidgetMessage(event) {
 
     // Any website can send messages here. Only listen to the widget.
@@ -75,7 +75,7 @@ function onWidgetMessage(event) {
 }
 
 
-// 3. Confirm the booking (guide steps 3a and 3c).
+// Step 3: confirm the booking (guide steps 3a and 3c).
 function confirmBooking(event) {
 
     // Don't let the browser send the form. We send it ourselves.
@@ -102,6 +102,7 @@ function confirmBooking(event) {
 }
 
 function showConfirmation(booking) {
+
     if (booking.errorMessage) {
         // For example, the hold expired and the seats must be picked again.
         document.querySelector('#error').textContent = booking.errorMessage;
@@ -115,5 +116,6 @@ function showConfirmation(booking) {
 
 // fetch() gives back a response. This reads the JSON inside it.
 function readJson(response) {
+
     return response.json();
 }

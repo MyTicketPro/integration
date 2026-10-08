@@ -5,6 +5,7 @@ fetch('/api/events')
 .then(showEvents);
 
 function showEvents(events) {
+
     const eventList = document.querySelector('#events');
 
     if (events.errorMessage) {
@@ -37,5 +38,6 @@ function showEvents(events) {
 
 // fetch() gives back a response. This reads the JSON inside it.
 function readJson(response) {
+
     return response.json();
 }

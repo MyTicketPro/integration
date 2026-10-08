@@ -2,6 +2,7 @@
 import { mtp } from '../mtp.js';
 
 export async function createWidget(req, res) {
+
     const widget = await mtp('POST', '/widgets', {
         productId: req.body.productId,
         optionId: 'widget',

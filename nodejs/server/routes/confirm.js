@@ -3,6 +3,7 @@
 import { mtp } from '../mtp.js';
 
 export async function confirmBooking(req, res) {
+
     const uuid = req.body.uuid;
     const contact = req.body.contact;
 

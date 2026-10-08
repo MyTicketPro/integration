@@ -5,6 +5,7 @@ const MTP_API   = process.env.MTP_API || 'https://api.sandbox.myticketpro.app/oc
 const MTP_TOKEN = process.env.MTP_TOKEN;
 
 export async function mtp(method, path, body) {
+
     if (!MTP_TOKEN) {
         throw new Error('MTP_TOKEN is not set. Copy .env.example to .env and add your sandbox token.');
     }

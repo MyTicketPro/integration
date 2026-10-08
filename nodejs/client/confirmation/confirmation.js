@@ -7,6 +7,7 @@ fetch(`/api/booking/${params.get('uuid')}`)
 .then(showBooking);
 
 function showBooking(booking) {
+
     const status = document.querySelector('#status');
 
     if (booking.errorMessage) {
@@ -44,5 +45,6 @@ function showBooking(booking) {
 
 // fetch() gives back a response. This reads the JSON inside it.
 function readJson(response) {
+
     return response.json();
 }
