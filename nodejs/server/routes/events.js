@@ -8,7 +8,7 @@ export async function listEvents(req, res) {
     
     const today = new Date();
     const in30Days = new Date();
-    in30Days.setDate(today.getDate() + 10);
+    in30Days.setDate(today.getDate() + 120);
 
     // Dates as YYYY-MM-DD ('en-CA' writes them that way).
     const localDateStart = today.toLocaleDateString('en-CA');
