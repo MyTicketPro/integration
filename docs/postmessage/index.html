@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MyTicketPro widget &mdash; postMessage demo</title>
+    <!-- `?direct` makes the Vite dev server return real text/css instead of the JS
+         module wrapper it otherwise serves for a .css file. A static host ignores it. -->
+    <link rel="stylesheet" href="../demo.css?direct">
+</head>
+<body>
+<main>
+
+    <h1>postMessage</h1>
+    <p class="lede">
+        <code>widget.url</code> in an iframe. Messages: <code>octo.widget.change</code> (repeats, full state),
+        <code>octo.widget.complete</code> (once), <code>octo.widget.resize</code>.
+    </p>
+    <p><a href="../index.html">&larr; integration guide</a></p>
+
+    <!-- shown when the page has no ?uuid= -->
+    <section id="setup" hidden>
+
+        <h2>Paste a widget uuid</h2>
+
+<pre><code>POST https://api.sandbox.myticketpro.app/octo/widgets
+Authorization: Bearer <em>&lt;token&gt;</em>
+
+{"productId": "...", "optionId": "widget", "availabilityId": "...", "returnUrl": null}</code></pre>
+
+        <div class="card">
+            <label for="uuid">Widget uuid</label>
+            <input id="uuid" type="text" placeholder="01a0af92-... (or paste the whole widget url)" autofocus>
+            <button id="load" type="button">Load the widget</button>
+            <p class="hint">Single use. Widget origin: <code id="origin-hint"></code></p>
+            <p class="hint">No uuid yet? <a href="../mint/index.html?mode=postmessage">Mint one</a>.</p>
+        </div>
+
+    </section>
+
+    <!-- shown when the page has a ?uuid= -->
+    <section id="demo" hidden>
+
+        <div id="status" class="status">Waiting for the first selection change&hellip;</div>
+
+        <div class="frame">
+            <div class="frame-bar">
+                <span id="src"></span>
+                <a href="?">use another uuid</a>
+            </div>
+            <iframe id="widget" title="MyTicketPro widget"></iframe>
+        </div>
+
+        <h2>Messages received</h2>
+        <div class="card">
+            <p id="log-empty" class="empty">Nothing yet.</p>
+            <ul id="log" class="log"></ul>
+        </div>
+
+        <h2>Last payload</h2>
+        <pre id="payload">&mdash;</pre>
+
+        <h2>The code doing it</h2>
+<pre><code>const origin = new URL(widget.url).origin;
+const frame  = document.getElementById("widget");
+
+frame.src = widget.url;
+
+window.addEventListener("message", event =&gt; {
+
+    if (event.origin !== origin) {
+        return;
+    }
+
+    const { type, payload } = event.data || {};
+
+    if (type === "octo.widget.change") {
+        render(payload);                  // {uuid, unitItems, pricing}
+    }
+
+    if (type === "octo.widget.complete") {
+        submitOrder(payload);             // {uuid, unitItems, pricing}
+    }
+
+    if (type === "octo.widget.resize") {
+        frame.style.height = payload.height + "px";   // {uuid, height}
+    }
+});</code></pre>
+
+    </section>
+
+</main>
+
+<script>
+(function () {
+
+    // These demos are published on GitHub Pages, away from the widget, so they use the sandbox widget.
+    const WIDGET_ORIGIN = "https://widget.sandbox.myticketpro.app";
+
+    const uuid = (new URLSearchParams(location.search).get("uuid") || "").trim();
+
+    if (uuid) {
+        showDemo(uuid);
+    }
+    else {
+        showSetup();
+    }
+
+
+    function showSetup() {
+
+        document.getElementById("setup").hidden            = false;
+        document.getElementById("origin-hint").textContent = WIDGET_ORIGIN;
+
+        const input = document.getElementById("uuid");
+
+        const go = () => {
+
+            const value = readUuid(input.value);
+
+            if (value) {
+                location.search = "?uuid=" + encodeURIComponent(value);
+            }
+        };
+
+        document.getElementById("load").addEventListener("click", go);
+        input.addEventListener("keydown", event => {
+
+            if (event.key === "Enter") {
+                go();
+            }
+        });
+    }
+
+
+    function showDemo(uuid) {
+
+        const src   = WIDGET_ORIGIN + "/" + encodeURIComponent(uuid);
+        const frame = document.getElementById("widget");
+
+        document.getElementById("demo").hidden     = false;
+        document.getElementById("src").textContent = src;
+        frame.src                                  = src;
+
+        let changes = 0;
+
+        window.addEventListener("message", event => {
+
+            if (event.origin !== WIDGET_ORIGIN) {
+                return;
+            }
+
+            const message = event.data || {};
+
+            // the internal minter mints mtp-channel widgets
+            if (!/^(mtp|octo)\.widget\./.test(String(message.type || ""))) {
+                return;
+            }
+
+            const type = message.type;
+            const kind = type.split(".").pop();
+
+            if (kind === "resize") {
+                frame.style.height = message.payload.height + "px";
+                note(type, "height " + show(message.payload.height));
+                return;
+            }
+
+            if (kind !== "change" && kind !== "complete") {
+                return;
+            }
+
+            const done = kind === "complete";
+
+            if (!done) {
+                changes++;
+            }
+
+            write(type, message.payload, done);
+            status(done, changes, message.payload);
+        });
+    }
+
+
+    function write(type, payload, done) {
+
+        const p      = payload || {};
+        const totals = p.pricing !== undefined
+                       ? {quantity: (p.unitItems || []).length, retail: (p.pricing || {}).retail}
+                       : (p.totals || {});
+
+        note(type, "quantity " + show(totals.quantity) + ", retail " + show(totals.retail), done);
+
+        document.getElementById("payload").textContent = JSON.stringify(payload, null, 4);
+    }
+
+
+    function note(type, what, done) {
+
+        const line = document.createElement("li");
+
+        line.className = done ? "complete" : "";
+        line.innerHTML = '<span class="when"></span><span class="kind"></span><span class="what"></span>';
+
+        line.querySelector(".when").textContent = new Date().toLocaleTimeString();
+        line.querySelector(".kind").textContent = type;
+        line.querySelector(".what").textContent = "  " + what;
+
+        const log = document.getElementById("log");
+        log.insertBefore(line, log.firstChild);
+        document.getElementById("log-empty").hidden = true;
+    }
+
+
+    function status(done, changes, payload) {
+
+        const box = document.getElementById("status");
+
+        box.classList.toggle("done", done);
+        box.textContent = done
+                          ? "Complete. The selection is recorded against widget "
+                            + show(payload && payload.uuid)
+                            + ". The uuid is spent."
+                          : "change received " + changes + " time(s).";
+    }
+
+
+    /** Accepts a bare uuid or the whole widget url. **/
+    function readUuid(value) {
+
+        const text = value.trim();
+
+        try {
+            return new URL(text).pathname.split("/").filter(Boolean).pop() || "";
+        }
+        catch (error) {
+            return text;
+        }
+    }
+
+
+    function show(value) {
+
+        return value === undefined || value === null ? "?" : String(value);
+    }
+
+})();
+</script>
+</body>
+</html>

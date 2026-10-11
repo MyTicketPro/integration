@@ -1,6 +1,6 @@
 # MyTicketPro Widget Example (Node.js)
 
-A reference implementation demonstrating how to sell tickets using the MyTicketPro embedded widget. This application implements the primary integration pattern outlined in the [Integration Guide](https://michel-widget.dev.myticketpro.app/integration/index.html): an `iframe` embedding strategy with `postMessage` event handling and automatic holds (`createBooking: true`).
+A reference implementation demonstrating how to sell tickets using the MyTicketPro embedded widget. This application implements the primary integration pattern outlined in the [Integration Guide](https://myticketpro.github.io/integration/): an `iframe` embedding strategy with `postMessage` event handling and automatic holds (`createBooking: true`).
 
 ## Application Flow
 
@@ -80,7 +80,7 @@ This example covers the recommended **embedded iframe** flow with **automatic ho
 * **Redirect Flow:** Directing users to `widget.url` with a `returnUrl` callback.
 * **Manual Holds:** Explicitly holding inventory using `createBooking: false` followed by `POST /octo/bookings`.
 
-Refer to the [Integration Guide](https://michel-widget.dev.myticketpro.app/integration/index.html) for detailed implementations of alternative patterns.
+Refer to the [Integration Guide](https://myticketpro.github.io/integration/) for detailed implementations of alternative patterns.
 
 ## AI & Tooling
 
@@ -88,7 +88,7 @@ Model Context Protocol (MCP) configurations for Claude, Cursor, VS Code, and Cha
 
 ## Resources
 
-* [Integration Guide](https://michel-widget.dev.myticketpro.app/integration/index.html)
+* [Integration Guide](https://myticketpro.github.io/integration/)
 * [Postman Collection](https://www.postman.com/myticketpro/myticketpro-developers)
 * [API Reference](https://www.postman.com/myticketpro/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea)
 * Support: `tech@myticketpro.com`

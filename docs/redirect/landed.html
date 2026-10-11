@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Return page &mdash; redirect demo</title>
+    <!-- `?direct` makes the Vite dev server return real text/css instead of the JS
+         module wrapper it otherwise serves for a .css file. A static host ignores it. -->
+    <link rel="stylesheet" href="../demo.css?direct">
+</head>
+<body>
+<main>
+
+    <h1>Your returnUrl</h1>
+    <p class="lede">
+        The widget sent the shopper here with <code>widgetUuid</code> in the query string.
+        Now call <code>GET /octo/widgets/{uuid}</code> from your backend.
+    </p>
+
+    <div class="card">
+        <p><strong>widgetUuid</strong></p>
+        <pre id="uuid">&mdash;</pre>
+    </div>
+
+    <p><a href="index.html">&larr; start another run</a></p>
+
+</main>
+
+<script>
+(function () {
+
+    const query = new URLSearchParams(location.search);
+
+    // the internal minter mints mtp-channel widgets, which return `widget_uuid`
+    const uuid = query.get("widgetUuid") || query.get("widget_uuid") || "";
+
+    document.getElementById("uuid").textContent = uuid || "(none in the query string)";
+
+})();
+</script>
+</body>
+</html>

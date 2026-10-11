@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MyTicketPro widget &mdash; redirect demo</title>
+    <!-- `?direct` makes the Vite dev server return real text/css instead of the JS
+         module wrapper it otherwise serves for a .css file. A static host ignores it. -->
+    <link rel="stylesheet" href="../demo.css?direct">
+</head>
+<body>
+<main>
+
+    <h1>Redirect</h1>
+    <p class="lede">
+        Send the shopper to <code>widget.url</code> as a full page, like PayPal. On completion the widget
+        navigates the page to <code>returnUrl?widgetUuid={uuid}</code>. Do not iframe it.
+    </p>
+    <p><a href="../index.html">&larr; integration guide</a></p>
+
+    <h2>Create</h2>
+<pre><code>POST https://api.sandbox.myticketpro.app/octo/widgets
+Authorization: Bearer <em>&lt;token&gt;</em>
+
+{"productId": "...", "optionId": "widget", "availabilityId": "...", "returnUrl": "<span id="return-url"></span>"}</code></pre>
+
+    <h2>Redirect</h2>
+<pre><code>window.location.assign(widget.url);</code></pre>
+
+    <h2>Try it</h2>
+    <div class="card">
+        <label for="uuid">Widget uuid</label>
+        <input id="uuid" type="text" placeholder="01a0af92-... (or the whole widget url)" autofocus>
+        <button id="open" type="button">Open widget</button>
+        <p class="hint">Single use. Widget origin: <code id="origin-hint"></code></p>
+        <p class="hint">No uuid yet? <a href="../mint/index.html?mode=redirect">Mint one</a>, with the return page filled in.</p>
+    </div>
+
+    <h2>Return</h2>
+    <p>Read the uuid from the query string and call <code>GET /octo/widgets/{uuid}</code> from your backend.</p>
+    <p><a href="landed.html?widgetUuid=example">landed.html</a> is this demo's return page.</p>
+
+</main>
+
+<script>
+(function () {
+
+    // These demos are published on GitHub Pages, away from the widget, so they use the sandbox widget.
+    const WIDGET_ORIGIN = "https://widget.sandbox.myticketpro.app";
+
+    document.getElementById("return-url").textContent  = new URL("landed.html", location.href).href;
+    document.getElementById("origin-hint").textContent = WIDGET_ORIGIN;
+
+    const input = document.getElementById("uuid");
+    const open  = document.getElementById("open");
+
+    // The minter links here with ?uuid= already filled in.
+    input.value = new URLSearchParams(location.search).get("uuid") || "";
+
+    const go = () => {
+
+        const value = readUuid(input.value);
+
+        if (value) {
+            window.location.assign(WIDGET_ORIGIN + "/" + encodeURIComponent(value));
+        }
+    };
+
+    open.addEventListener("click", go);
+
+    input.addEventListener("keydown", event => {
+
+        if (event.key === "Enter") {
+            go();
+        }
+    });
+
+
+    /** Accepts a bare uuid or the whole widget url. **/
+    function readUuid(value) {
+
+        const text = value.trim();
+
+        try {
+            return new URL(text).pathname.split("/").filter(Boolean).pop() || "";
+        }
+        catch (error) {
+            return text;
+        }
+    }
+
+})();
+</script>
+</body>
+</html>

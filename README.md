@@ -5,7 +5,7 @@ Code samples showing how to integrate MyTicketPro ticket sales into your applica
 Follow these steps:
 1. Clone the repository.
 2. Add your sandbox token.
-3. Run the application alongside the [Integration Guide](https://widget.sandbox.myticketpro.app/integration/).
+3. Run the application alongside the [Integration Guide](https://myticketpro.github.io/integration/).
 
 ## Available Examples
 
@@ -132,7 +132,7 @@ Navigate to **Settings** → **Apps & Connectors** → **Developer mode** → **
 
 ## Resources
 
-- [Integration Guide](https://widget.sandbox.myticketpro.app/integration/)
+- [Integration Guide](https://myticketpro.github.io/integration/)
 - [Postman Collection](https://www.postman.com/myticketpro/myticketpro-developers)
 - [API Reference Documentation](https://www.postman.com/myticketpro/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea)
 - Support: tech@myticketpro.com
