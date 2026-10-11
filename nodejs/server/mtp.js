@@ -20,10 +20,22 @@ export async function mtp(method, path, body) {
         body: body ? JSON.stringify(body) : undefined,
     });
 
-    const data = await response.json();
+    // A body can only be read once, so keep a copy to log if it isn't JSON for debug purposes.
+    const copy = response.clone();
+
+    let data;
+    try {
+        data = await response.json();
+    } catch {
+        const text = await copy.text();
+        console.error(`MyTicketPro ${method} ${path} → ${response.status}, body is not JSON:\n${text}`);
+        throw new Error(`MyTicketPro sent a response that is not JSON (status ${response.status})`);
+    }
 
     // MyTicketPro answers errors with { error, errorMessage }.
+
     if (!response.ok) {
+        console.error(`[MyTicketPro ${method} ${path}] ${response.status}`, JSON.stringify(data, null, 2));
         const error = new Error(data.errorMessage);
         error.code = data.error;
         error.status = response.status;
