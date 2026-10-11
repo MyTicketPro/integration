@@ -1314,12 +1314,14 @@ var availabilityId = (string)dates.AsArray().First(date =&gt; (bool)date!["avail
                 <li><code>change</code>: fires on every selection change, including when the selection is cleared. It carries the full current selection and may repeat.</li>
                 <li><code>complete</code>: fires once, when the shopper finishes. It has the same payload as <code>change</code>. Then go to step 3.</li>
                 <li><code>resize</code>: <code>{uuid, height}</code>. The height is 800 while the shopper selects, and stays 800 after completion. If the widget opens already expired, canceled or completed, it is the height of that message.</li>
+                <li>The widget sends only the target height, not the steps in between. To animate the change, put <code>transition: height 500ms ease-in-out</code> on the iframe. Start it at <code>height: 800px</code>, with <code>scrolling="no"</code> and <code>overflow: hidden</code> so no scrollbar flashes while it resizes.</li>
                 <li>The payload is <code>{uuid, unitItems, pricing}</code>. <code>unitItems</code> has one entry per ticket. <code>pricing</code> is in cents and comes from the browser. Charge <code>booking.pricing.retail</code>.</li>
             </ul>
         </div>
         <div class="example">
             <p class="label">HTML + JavaScript, in your page</p>
-<pre><code>&lt;iframe id="octo-widget" src="<em>{widget.url}</em>" style="width:100%; height:800px; border:0;"&gt;&lt;/iframe&gt;
+<pre><code>&lt;iframe id="octo-widget" src="<em>{widget.url}</em>" scrolling="no"
+        style="width:100%; height:800px; border:0; overflow:hidden; transition:height 500ms ease-in-out;"&gt;&lt;/iframe&gt;
 &lt;script&gt;
     const widgetOrigin = new URL("<em>{widget.url}</em>").origin;
     const iframe       = document.getElementById("octo-widget");
