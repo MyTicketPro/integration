@@ -1,75 +1,94 @@
-# MyTicketPro widget example (Node.js)
+# MyTicketPro Widget Example (Node.js)
 
-A small working shop that sells tickets through the MyTicketPro widget. It is the
-[integration guide](https://michel-widget.dev.myticketpro.app/integration/index.html) as a runnable app, with
-the recommended setup: **postMessage** (the widget is embedded in an iframe) and **hold automatically**
-(`createBooking: true`).
+A reference implementation demonstrating how to sell tickets using the MyTicketPro embedded widget. This application implements the primary integration pattern outlined in the [Integration Guide](https://michel-widget.dev.myticketpro.app/integration/index.html): an `iframe` embedding strategy with `postMessage` event handling and automatic holds (`createBooking: true`).
 
-Each page is one step of the flow. Every page has a short note listing what just happened, and which API calls it made.
-The widget page also has a **Widget events** box that shows every message the widget sends to the page, as it arrives.
+## Application Flow
 
-| Page | What the shopper does | Browser file | Server file | MyTicketPro call |
+Each route represents a discrete phase in the purchasing workflow. Pages log executed API requests and display realtime `postMessage` events emitted by the embedded widget.
+
+| Route | User Action | Frontend Code | Backend Code | API Endpoint |
 | --- | --- | --- | --- | --- |
-| `/` | Reads what the example shows | `client/index.html` | | |
-| `/products/` | Picks an event (product) and a date (availability) | `client/products/products.js` | `server/routes/products.js` | `GET /products`, `POST /availability` |
-| `/widget/` | Picks tickets (unit items) in the widget. When done, the widget is replaced by the checkout, where the shopper confirms | `client/widget/widget.js` | `server/routes/widgets.js`, `server/routes/confirm.js` | `POST /widgets`, `GET /widgets/{uuid}`, `POST /bookings/{uuid}/confirm` |
-| `/booking/` | Sees the confirmed booking | `client/booking/booking.js` | `server/routes/bookings.js` | `GET /bookings/{uuid}` |
+| `/` | Overview & documentation | `client/index.html` | — | — |
+| `/products/` | Select product (event) and availability (date) | `client/products/products.js` | `server/routes/products.js` | `GET /products`<br>`POST /availability` |
+| `/widget/` | Select units/seats inside widget and complete checkout | `client/widget/widget.js` | `server/routes/widgets.js`<br>`server/routes/confirm.js` | `POST /widgets`<br>`GET /widgets/{uuid}`<br>`POST /bookings/{uuid}/confirm` |
+| `/booking/` | View confirmed booking summary | `client/booking/booking.js` | `server/routes/bookings.js` | `GET /bookings/{uuid}` |
 
-## OCTO words used in this example
+## Key Concepts & Terminology
 
-The code uses OCTO's names, so it matches the guide and the API. In shopper terms:
+This implementation uses standard [OCTO API](https://www.octo.travel/) domain entities:
 
-| OCTO | Means | Example |
+| OCTO Concept | Description | Example Value |
 | --- | --- | --- |
-| product | An event | `product-atlanta_braves_game`, `internalName: "Atlanta Braves Game"` |
-| availability | One date and time of that event | `localDateTimeStart: "2026-11-01T20:00:00-05:00"` |
-| widget | The seat-picking page for one product and availability | `widget.uuid`, `widget.url` |
-| unit item | One ticket the shopper picked | `unitItems.length` is the number of tickets |
-| pricing | Prices in cents | `pricing.retail: 9000` is $90.00 |
-| booking | The tickets, held (`ON_HOLD`) then `CONFIRMED` | `booking.uuid`, `booking.supplierReference` |
-| contact | Who the tickets are for | `firstName`, `lastName`, `emailAddress`, `phoneNumber` |
+| **Product** | The event or attraction for sale | `product-atlanta_braves_game` |
+| **Availability** | Specific date/time slot for a product | `2026-11-01T20:00:00-05:00` |
+| **Widget** | Embedded seat/ticket selection interface | `widget.uuid`, `widget.url` |
+| **Unit Item** | Individual ticket instance | `unitItems` array |
+| **Pricing** | Monetary amounts represented in cents | `9000` ($90.00 USD) |
+| **Booking** | Ticket reservation status (`ON_HOLD` or `CONFIRMED`) | `booking.uuid` |
+| **Contact** | Ticket holder details | `firstName`, `emailAddress` |
 
-There is no separate hold call (`POST /octo/bookings`), because `createBooking: true` makes MyTicketPro hold the tickets as soon
-as the shopper finishes.
+> **Note on Holds:** Passing `createBooking: true` automatically creates a temporary hold upon checkout completion. A separate `POST /octo/bookings` call is not required.
 
-`client/` runs in the browser. `server/` runs on your server, and `server/mtp.js` (the guide's `mtp()` helper) is
-the only code that calls MyTicketPro, so the API token never reaches the browser.
+## Architecture & Security
 
-## Run it
+* **Frontend (`client/`):** Static assets served directly to the browser.
+* **Backend (`server/`):** Node.js Express server handling business logic.
+* **API Isolation (`server/mtp.js`):** All outbound MyTicketPro API requests are executed backend-to-backend. API tokens are never exposed to the client.
 
-Requirements: Node 22 or newer, and a MyTicketPro sandbox token (ask tech@myticketpro.com).
+## Quick Start
 
-```sh
-npm i
-cp .env.example .env   # then put your sandbox token in MTP_TOKEN
-npm start              # open http://localhost:3000
-```
+### Prerequisites
 
-One process serves the pages and the API on port 3000 (set `PORT` in `.env` to change it).
-There is no build step: the files in `client/` are sent to the browser as they are.
-The server restarts by itself when you edit a file in `server/`. After editing a page, refresh the browser.
+* Node.js 22 or higher
+* Sandbox API token (request via `tech@myticketpro.com`)
 
-## Going live
+### Setup & Run
 
-Set `MTP_API=https://api.myticketpro.app/octo` and use your production token. Nothing else changes.
+1. **Install dependencies:**
+   ```sh
+   npm install
+   ```
 
-## Other setups
+2. **Configure environment:**
+   ```sh
+   cp .env.example .env
+   ```
+   Set `MTP_TOKEN` in `.env` to your sandbox token.
 
-The guide also covers the **redirect** flow (send the shopper to `widget.url` and get them back on your
-`returnUrl`) and **holding the tickets yourself** (`createBooking: false`, then `POST /octo/bookings`). This example does not
-implement them. Pick that setup at the top of the guide to see the code it needs.
+3. **Start the application:**
+   ```sh
+   npm start
+   ```
+   Access the application at `http://localhost:3000`.
 
-## Ask your AI
+The development server includes live restart for backend changes (`server/`). Port number can be overridden by setting `PORT` in `.env`.
 
-The MyTicketPro docs are available as an MCP server. No token needed.
+## Production Deployment
 
-- Claude Code: `claude mcp add --transport http myticketpro https://api.sandbox.myticketpro.app/mcp`
-- Cursor, in `.cursor/mcp.json`: `{ "mcpServers": { "myticketpro": { "url": "https://api.sandbox.myticketpro.app/mcp" } } }`
-- VS Code, in `.vscode/mcp.json`: `{ "servers": { "myticketpro": { "type": "http", "url": "https://api.sandbox.myticketpro.app/mcp" } } }`
-- Codex: `codex mcp add myticketpro --url https://api.sandbox.myticketpro.app/mcp`
+To switch to production:
 
-## Links
+1. Update the API base URL in `.env`:
+   ```env
+   MTP_API=https://api.myticketpro.app/octo
+   ```
+2. Replace `MTP_TOKEN` with your production API credential.
 
-- [Integration guide](https://michel-widget.dev.myticketpro.app/integration/index.html)
-- [Postman collection](https://www.postman.com/myticketpro/myticketpro-developers)
-- [API reference (Postman)](https://www.postman.com/myticketpro/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea)
+## Alternative Integration Patterns
+
+This example covers the recommended **embedded iframe** flow with **automatic holds**. The OCTO specification also supports:
+
+* **Redirect Flow:** Directing users to `widget.url` with a `returnUrl` callback.
+* **Manual Holds:** Explicitly holding inventory using `createBooking: false` followed by `POST /octo/bookings`.
+
+Refer to the [Integration Guide](https://michel-widget.dev.myticketpro.app/integration/index.html) for detailed implementations of alternative patterns.
+
+## AI & Tooling
+
+Model Context Protocol (MCP) configurations for Claude, Cursor, VS Code, and ChatGPT are available in the [root README](../README.md#model-context-protocol-mcp-setup).
+
+## Resources
+
+* [Integration Guide](https://michel-widget.dev.myticketpro.app/integration/index.html)
+* [Postman Collection](https://www.postman.com/myticketpro/myticketpro-developers)
+* [API Reference](https://www.postman.com/myticketpro/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea)
+* Support: `tech@myticketpro.com`
