@@ -1,4 +1,4 @@
-// Guide step 1c: create the widget for the date the shopper picked.
+// POST /octo/widgets: create the widget for the product and availability the shopper picked.
 import { mtp } from '../mtp.js';
 
 export async function createWidget(req, res) {
@@ -7,7 +7,7 @@ export async function createWidget(req, res) {
         productId: req.body.productId,
         optionId: 'widget',
         availabilityId: req.body.availabilityId,
-        // Hold the seats as soon as the shopper finishes, so step 3b is not needed.
+        // Hold the tickets as soon as the shopper finishes, so we never call POST /octo/bookings ourselves.
         createBooking: true,
         // No returnUrl: the widget sits in an iframe and talks with postMessage.
         returnUrl: null,

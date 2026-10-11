@@ -1,19 +1,19 @@
 // Starts the Express server, mounts the API routes and serves the pages.
 import express from 'express';
 
-import { listEvents } from './routes/events.js';
-import { createWidget } from './routes/widget.js';
+import { listProducts } from './routes/products.js';
+import { createWidget } from './routes/widgets.js';
 import { confirmBooking } from './routes/confirm.js';
-import { getBooking } from './routes/booking.js';
+import { getBooking } from './routes/bookings.js';
 
 const app = express();
 app.use(express.json());
 
-// The API routes, with the guide steps they cover.
-app.get('/api/events', listEvents);         // steps 1a, 1b
-app.post('/api/widget', createWidget);      // step 1c
-app.post('/api/confirm', confirmBooking);   // steps 3a, 3c
-app.get('/api/booking/:uuid', getBooking);  // shows the result
+// The API routes, with the MyTicketPro calls they make.
+app.get('/api/products', listProducts);      // GET /octo/products, POST /octo/availability
+app.post('/api/widgets', createWidget);      // POST /octo/widgets
+app.post('/api/confirm', confirmBooking);    // GET /octo/widgets/{uuid}, POST /octo/bookings/{uuid}/confirm
+app.get('/api/bookings/:uuid', getBooking);  // shows the result
 
 // Every failure, ours or MyTicketPro's, reaches the browser
 // as { error, errorMessage }.

@@ -1,4 +1,4 @@
-// Reads one booking, so the confirmation page can show it.
+// Reads one booking, so the booking page can show it.
 import { mtp } from '../mtp.js';
 
 export async function getBooking(req, res) {

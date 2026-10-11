@@ -41,6 +41,12 @@ h1 {
     margin: 0 0 16px;
 }
 
+/* Section titles: "What happened", "Widget events" */
+h2 {
+    font-size: 18px;
+    margin: 0 0 12px;
+}
+
 /* Step bar */
 .steps {
     display: flex;
@@ -64,8 +70,8 @@ h1 {
     border-color: var(--brand);
 }
 
-/* Step 1: event cards with one button per date */
-.event {
+/* Step 1: product cards with one button per availability */
+.product {
     padding: 16px;
     margin-bottom: 12px;
     background: #fff;
@@ -73,12 +79,12 @@ h1 {
     border-radius: 12px;
 }
 
-.event h2 {
+.product h2 {
     font-size: 18px;
     margin: 0 0 12px;
 }
 
-.event .button {
+.product .button {
     margin: 0 8px 8px 0;
 }
 
@@ -147,6 +153,12 @@ button,
     cursor: pointer;
 }
 
+/* While a request is in progress */
+button:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
 /* The intro page's table of pages and files */
 table {
     width: 100%;
@@ -185,17 +197,95 @@ dd {
     color: var(--red);
 }
 
-/* The yellow notes that explain what each step did */
+/* The notes that explain what each step did */
 .dev {
-    padding: 12px 16px;
+    padding: 10px 12px;
     margin-bottom: 24px;
-    font-size: 14px;
-    background: #fff8e1;
-    border-left: 4px solid #f5b400;
-    border-radius: 4px;
+    font-size: 13px;
+    background: #fff;
+    border: 1px solid var(--border);
 }
 
 .dev ol {
     margin: 0;
     padding-left: 20px;
+}
+
+.dev li + li {
+    margin-top: 8px;
+}
+
+/* The second line of a step: the API call it made */
+.dev small {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* The widget page: the steps on the left, the "Widget events" box on the right */
+main.with-events {
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    gap: 24px;
+    max-width: 1400px;
+}
+
+/* Lets long lines scroll inside the box instead of widening the columns */
+main.with-events > * {
+    min-width: 0;
+}
+
+main.with-events aside {
+    position: sticky;
+    top: 16px;
+    align-self: start;
+}
+
+/* On narrow screens the box goes below instead */
+@media (max-width: 1100px) {
+    main.with-events {
+        grid-template-columns: 1fr;
+    }
+
+    main.with-events aside {
+        position: static;
+    }
+}
+
+/* The "Widget events" box: every message the widget sends, newest first */
+#events {
+    max-height: calc(100vh - 80px);
+    overflow: auto;
+    font-size: 13px;
+    background: #fff;
+    border: 1px solid var(--border);
+}
+
+/* Shown until the first message arrives */
+#events:empty::before {
+    display: block;
+    padding: 12px;
+    content: "No events yet.";
+    color: var(--muted);
+}
+
+/* One message: its type and time, what it means, and the data it carries */
+.widget-event {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.widget-event p {
+    margin: 0 0 4px;
+}
+
+.widget-event span {
+    float: right;
+    color: var(--muted);
+}
+
+.widget-event pre {
+    margin: 0;
+    overflow: auto;
+    font-size: 12px;
 }

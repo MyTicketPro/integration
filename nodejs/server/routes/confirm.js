@@ -1,15 +1,15 @@
-// Guide steps 3a and 3c: read the widget, then confirm the booking
+// GET /octo/widgets/{uuid} and POST /octo/bookings/{uuid}/confirm: read the widget, then confirm the booking
 // it is holding.
 import { mtp } from '../mtp.js';
 
 export async function confirmBooking(req, res) {
 
-    const uuid = req.body.uuid;
+    const widgetUuid = req.body.widgetUuid;
     const contact = req.body.contact;
 
-    // Step 3a: read the widget from MyTicketPro. Never trust seats or prices
+    // Read the widget from MyTicketPro. Never trust unitItems or pricing
     // sent by the browser, because anyone can edit them.
-    const widget = await mtp('GET', `/widgets/${uuid}`);
+    const widget = await mtp('GET', `/widgets/${widgetUuid}`);
     const booking = widget.booking;
 
     if (widget.status !== 'COMPLETED') {
@@ -23,7 +23,7 @@ export async function confirmBooking(req, res) {
         return;
     }
 
-    // The seats are held until booking.utcExpiresAt (15 minutes by default).
+    // The tickets are held until booking.utcExpiresAt (15 minutes by default).
     if (booking.status !== 'ON_HOLD' || new Date(booking.utcExpiresAt) < new Date()) {
         res.status(410).json({ errorMessage: 'Your seats were released. Please pick them again.' });
         return;
@@ -31,9 +31,9 @@ export async function confirmBooking(req, res) {
 
     // A real shop charges booking.pricing.retail here, before confirming.
 
-    // Step 3c: confirm. The tickets are emailed to emailAddress.
+    // Confirm. The tickets are emailed to emailAddress.
     const confirmed = await mtp('POST', `/bookings/${booking.uuid}/confirm`, {
-        resellerReference: `example-${uuid}`,
+        resellerReference: `example-${widgetUuid}`,
         contact: {
             firstName: contact.firstName,
             lastName: contact.lastName,

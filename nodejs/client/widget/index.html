@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Choose your seats</title>
+        <link rel="stylesheet" href="/style.css" />
+    </head>
+
+    <body>
+        <header>
+            <strong>Demo Shop</strong>
+            <span>MyTicketPro widget example</span>
+        </header>
+
+        <main class="with-events">
+            <div>
+                <!-- Shown first: the widget -->
+                <div id="widget">
+                    <ol class="steps">
+                        <li>1. Date</li>
+                        <li class="current">2. Seats</li>
+                        <li>3. Checkout</li>
+                        <li>4. Done</li>
+                    </ol>
+
+                    <p><a href="/products/">← All events</a></p>
+
+                    <div class="card">
+                        <div class="card-bar" id="summary">Loading the widget…</div>
+                        <iframe id="octo-widget" title="Seat selection"></iframe>
+                    </div>
+                </div>
+
+                <!-- Replaces the widget when the shopper finishes picking seats -->
+                <div id="checkout" hidden>
+                    <ol class="steps">
+                        <li>1. Date</li>
+                        <li>2. Seats</li>
+                        <li class="current">3. Checkout</li>
+                        <li>4. Done</li>
+                    </ol>
+
+                    <div class="card card-padded">
+                        <span class="badge">Seats held</span>
+                        <h1>Checkout</h1>
+                        <p id="checkout-summary"></p>
+
+                        <form id="contact">
+                            <input name="firstName" placeholder="First name" required />
+                            <input name="lastName" placeholder="Last name" required />
+                            <input name="emailAddress" type="email" placeholder="Email" required />
+                            <input name="phoneNumber" type="tel" placeholder="Phone, e.g. +15551234567" required />
+                            <button>Pay and confirm</button>
+                            <p id="error" class="error"></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- On the side: what just happened, and every message the widget sends to this page, newest first (filled by widget.js). -->
+            <aside>
+                <h2>What happened</h2>
+                <div class="dev" id="dev-widget">
+                    <ol>
+                        <li>
+                            <code>widget.js</code> asked our server for a widget.
+                            <small><code>POST /api/widgets</code></small>
+                        </li>
+                        <li>
+                            <code>server/routes/widgets.js</code> created it at MyTicketPro.
+                            <small><code>POST /octo/widgets</code></small>
+                        </li>
+                        <li><code>widget.js</code> put <code>widget.url</code> in the iframe and listens to its messages.</li>
+                        <li>Every message the widget sends shows up in <b>Widget events</b> below.</li>
+                    </ol>
+                </div>
+
+                <div class="dev" id="dev-checkout" hidden>
+                    <ol>
+                        <li>The widget sent <code>octo.widget.complete</code>.</li>
+                        <li><code>widget.js</code> replaced the widget with this checkout.</li>
+                        <li>MyTicketPro holds the tickets for 15 minutes, because the widget was created with <code>createBooking: true</code>.</li>
+                        <li>A real shop takes payment here.</li>
+                        <li>
+                            "Pay and confirm" sends the <code>widgetUuid</code> and the <code>contact</code> to our server.
+                            <small><code>POST /api/confirm</code></small>
+                        </li>
+                        <li>
+                            <code>server/routes/confirm.js</code> reads the widget, then confirms the booking.
+                            <small><code>GET /octo/widgets/{uuid}</code><br><code>POST /octo/bookings/{uuid}/confirm</code></small>
+                        </li>
+                    </ol>
+                </div>
+
+                <h2>Widget events</h2>
+                <div id="events"></div>
+            </aside>
+        </main>
+
+        <script type="module" src="./widget.js"></script>
+    </body>
+</html>

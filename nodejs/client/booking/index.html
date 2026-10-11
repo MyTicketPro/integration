@@ -21,12 +21,19 @@
                 <li class="current">4. Done</li>
             </ol>
 
+            <h2>What happened</h2>
             <div class="dev">
                 <ol>
-                    <li>The booking was confirmed on the seats page (<a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#confirm" target="_blank">guide step 3c</a>). MyTicketPro emails the tickets.</li>
-                    <li><code>seats.js</code> then opened this page with the booking uuid in the URL.</li>
-                    <li><code>confirmation.js</code> asked our server for the booking (<code>GET /api/booking/{uuid}</code>).</li>
-                    <li><code>server/routes/booking.js</code> called <code>GET /octo/bookings/{uuid}</code>.</li>
+                    <li>The booking was confirmed on the widget page. MyTicketPro emails the tickets.</li>
+                    <li><code>widget.js</code> opened this page with the booking uuid in the URL.</li>
+                    <li>
+                        <code>booking.js</code> asked our server for the booking.
+                        <small><code>GET /api/bookings/{uuid}</code></small>
+                    </li>
+                    <li>
+                        <code>server/routes/bookings.js</code> read it from MyTicketPro.
+                        <small><code>GET /octo/bookings/{uuid}</code></small>
+                    </li>
                 </ol>
             </div>
 
@@ -39,24 +46,24 @@
 
                     <dl>
                         <dt>Reference</dt>
-                        <dd id="reference"></dd>
+                        <dd id="supplier-reference"></dd>
                         <dt>Date</dt>
-                        <dd id="date"></dd>
+                        <dd id="availability"></dd>
                         <dt>Seats</dt>
-                        <dd id="seats"></dd>
+                        <dd id="unit-items"></dd>
                         <dt>Total</dt>
-                        <dd id="total"></dd>
+                        <dd id="retail"></dd>
                         <dt>Tickets sent to</dt>
-                        <dd id="email"></dd>
+                        <dd id="email-address"></dd>
                     </dl>
 
                     <p><a id="tickets" hidden>Download tickets (PDF)</a></p>
                 </div>
 
-                <p><a href="/events/">Back to events</a></p>
+                <p><a href="/products/">Back to events</a></p>
             </div>
         </main>
 
-        <script type="module" src="./confirmation.js"></script>
+        <script type="module" src="./booking.js"></script>
     </body>
 </html>

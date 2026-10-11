@@ -23,32 +23,28 @@
                     <th>What the shopper does</th>
                     <th>Browser file</th>
                     <th>Server file</th>
-                    <th><a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto" target="_blank">Guide</a> step</th>
                 </tr>
                 <tr>
-                    <td><code>/events/</code></td>
-                    <td>Picks an event date</td>
-                    <td><code>client/events/events.js</code></td>
-                    <td><code>server/routes/events.js</code></td>
-                    <td><a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#product" target="_blank">1a</a>, <a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#availability" target="_blank">1b</a></td>
+                    <td><code>/products/</code></td>
+                    <td>Picks an event (product) and a date (availability)</td>
+                    <td><code>client/products/products.js</code></td>
+                    <td><code>server/routes/products.js</code></td>
                 </tr>
                 <tr>
-                    <td><code>/seats/</code></td>
-                    <td>Picks seats in the widget, then enters contact details and confirms</td>
-                    <td><code>client/seats/seats.js</code></td>
-                    <td><code>server/routes/widget.js</code>, <code>server/routes/confirm.js</code></td>
-                    <td><a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#create" target="_blank">1c</a>, <a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#embed" target="_blank">2</a>, <a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#result" target="_blank">3a</a>, <a href="https://michel-widget.dev.myticketpro.app/integration/index.html?mode=postmessage&amp;booking=auto#confirm" target="_blank">3c</a></td>
+                    <td><code>/widget/</code></td>
+                    <td>Picks tickets (unit items) in the widget, then enters contact details and confirms</td>
+                    <td><code>client/widget/widget.js</code></td>
+                    <td><code>server/routes/widgets.js</code>, <code>server/routes/confirm.js</code></td>
                 </tr>
                 <tr>
-                    <td><code>/confirmation/</code></td>
+                    <td><code>/booking/</code></td>
                     <td>Sees the confirmed booking</td>
-                    <td><code>client/confirmation/confirmation.js</code></td>
-                    <td><code>server/routes/booking.js</code></td>
-                    <td></td>
+                    <td><code>client/booking/booking.js</code></td>
+                    <td><code>server/routes/bookings.js</code></td>
                 </tr>
             </table>
 
-            <p><a class="button" href="/events/">Pick an event</a></p>
+            <p><a class="button" href="/products/">Pick an event</a></p>
         </main>
     </body>
 </html>

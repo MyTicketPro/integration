@@ -5,16 +5,31 @@ A small working shop that sells tickets through the MyTicketPro widget. It is th
 the recommended setup: **postMessage** (the widget is embedded in an iframe) and **hold automatically**
 (`createBooking: true`).
 
-Each page is one step of the flow. Every page has a yellow "For developers" note saying what just happened.
+Each page is one step of the flow. Every page has a short note listing what just happened, and which API calls it made.
+The widget page also has a **Widget events** box that shows every message the widget sends to the page, as it arrives.
 
-| Page | What the shopper does | Guide step | Browser file | Server file | MyTicketPro call |
-| --- | --- | --- | --- | --- | --- |
-| `/` | Reads what the example shows | | `client/index.html` | | |
-| `/events/` | Picks an event date | 1a, 1b | `client/events/events.js` | `server/routes/events.js` | `GET /products`, `POST /availability` |
-| `/seats/` | Picks seats in the widget. When done, the widget is replaced by the checkout, where the shopper confirms | 1c, 2, 3a, 3c | `client/seats/seats.js` | `server/routes/widget.js`, `server/routes/confirm.js` | `POST /widgets`, `GET /widgets/{uuid}`, `POST /bookings/{uuid}/confirm` |
-| `/confirmation/` | Sees the confirmed booking | | `client/confirmation/confirmation.js` | `server/routes/booking.js` | `GET /bookings/{uuid}` |
+| Page | What the shopper does | Browser file | Server file | MyTicketPro call |
+| --- | --- | --- | --- | --- |
+| `/` | Reads what the example shows | `client/index.html` | | |
+| `/products/` | Picks an event (product) and a date (availability) | `client/products/products.js` | `server/routes/products.js` | `GET /products`, `POST /availability` |
+| `/widget/` | Picks tickets (unit items) in the widget. When done, the widget is replaced by the checkout, where the shopper confirms | `client/widget/widget.js` | `server/routes/widgets.js`, `server/routes/confirm.js` | `POST /widgets`, `GET /widgets/{uuid}`, `POST /bookings/{uuid}/confirm` |
+| `/booking/` | Sees the confirmed booking | `client/booking/booking.js` | `server/routes/bookings.js` | `GET /bookings/{uuid}` |
 
-Step 3b (holding the seats yourself) is skipped, because `createBooking: true` makes MyTicketPro hold them as soon
+## OCTO words used in this example
+
+The code uses OCTO's names, so it matches the guide and the API. In shopper terms:
+
+| OCTO | Means | Example |
+| --- | --- | --- |
+| product | An event | `product-atlanta_braves_game`, `internalName: "Atlanta Braves Game"` |
+| availability | One date and time of that event | `localDateTimeStart: "2026-11-01T20:00:00-05:00"` |
+| widget | The seat-picking page for one product and availability | `widget.uuid`, `widget.url` |
+| unit item | One ticket the shopper picked | `unitItems.length` is the number of tickets |
+| pricing | Prices in cents | `pricing.retail: 9000` is $90.00 |
+| booking | The tickets, held (`ON_HOLD`) then `CONFIRMED` | `booking.uuid`, `booking.supplierReference` |
+| contact | Who the tickets are for | `firstName`, `lastName`, `emailAddress`, `phoneNumber` |
+
+There is no separate hold call (`POST /octo/bookings`), because `createBooking: true` makes MyTicketPro hold the tickets as soon
 as the shopper finishes.
 
 `client/` runs in the browser. `server/` runs on your server, and `server/mtp.js` (the guide's `mtp()` helper) is
@@ -41,7 +56,7 @@ Set `MTP_API=https://api.myticketpro.app/octo` and use your production token. No
 ## Other setups
 
 The guide also covers the **redirect** flow (send the shopper to `widget.url` and get them back on your
-`returnUrl`) and **holding the seats yourself** (`createBooking: false`, then step 3b). This example does not
+`returnUrl`) and **holding the tickets yourself** (`createBooking: false`, then `POST /octo/bookings`). This example does not
 implement them. Pick that setup at the top of the guide to see the code it needs.
 
 ## Ask your AI
