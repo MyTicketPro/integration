@@ -1,1799 +1,2132 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>MyTicketPro widget &mdash; integration guide</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
-    <style>
-        /* Dev-docs layout: sticky table of contents | explanation | code. Collapses to one column on narrow screens. */
-        :root {
-            --page     : #f7f8fa;
-            --card     : #ffffff;
-            --ink      : #0f1729;
-            --muted    : #5b6577;
-            --line     : #e3e7ee;
-            --accent   : #2f6bff;
-            --accent-bg: #eef3ff;
-            --code-bg  : #0b1220;
-            --code-bar : #111a2c;
-            --code-line: #1f2a40;
-            --code-ink : #d6deeb;
-            --code-dim : #7f8ca3;
-            --get      : #0f9d6b;
-            --post     : #2f6bff;
-            --warn     : #c2410c;
-            --sans     : "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            --mono     : "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        }
-        * {
-            box-sizing: border-box;
-        }
-        [hidden] {
-            display: none !important;
-        }
-        html {
-            scroll-behavior: smooth;
-            scroll-padding-top: 16px;
-        }
-        @media (prefers-reduced-motion: reduce) {
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>MyTicketPro widget &mdash; integration guide</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+        <style>
+            /* Dev-docs layout: sticky table of contents | explanation | code. Collapses to one column on narrow screens. */
+            :root {
+                --page: #f7f8fa;
+                --card: #ffffff;
+                --ink: #0f1729;
+                --muted: #5b6577;
+                --line: #e3e7ee;
+                --accent: #2f6bff;
+                --accent-bg: #eef3ff;
+                --code-bg: #0b1220;
+                --code-bar: #111a2c;
+                --code-line: #1f2a40;
+                --code-ink: #d6deeb;
+                --code-dim: #7f8ca3;
+                --get: #0f9d6b;
+                --post: #2f6bff;
+                --warn: #c2410c;
+                --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            [hidden] {
+                display: none !important;
+            }
+
             html {
-                scroll-behavior: auto;
+                scroll-behavior: smooth;
+                scroll-padding-top: 16px;
             }
-        }
-        body {
-            margin: 0;
-            padding: 0 16px;
-            background: var(--page);
-            color: var(--ink);
-            font-family: var(--sans);
-            font-size: 15px;
-            line-height: 1.65;
-            -webkit-font-smoothing: antialiased;
-            /* JetBrains Mono would draw === and !== as single symbols, show the characters devs type */
-            font-variant-ligatures: none;
-        }
-        a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        code {
-            font-family: var(--mono);
-            font-size: .86em;
-            padding: 1px 5px;
-            border: 1px solid var(--line);
-            border-radius: 4px;
-            background: var(--card);
-        }
 
-        /* shell */
-        .shell {
-            display: grid;
-            grid-template-columns: 220px minmax(0, 1fr);
-            gap: 48px;
-            width: 80%;
-            margin: 0 auto;
-        }
-        main {
-            min-width: 0;
-            padding-block: 48px 96px;
-        }
+            @media (prefers-reduced-motion: reduce) {
+                html {
+                    scroll-behavior: auto;
+                }
+            }
 
-        /* table of contents */
-        .toc {
-            position: sticky;
-            top: 0;
-            align-self: start;
-            max-height: 100vh;
-            overflow-y: auto;
-            padding-block: 48px 24px;
-            font-size: 13.5px;
-        }
-        .toc .brand {
-            margin: 0 0 24px;
-            font-family: var(--mono);
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: .04em;
-            color: var(--ink);
-        }
-        .toc .brand span {
-            color: var(--accent);
-        }
-        .toc p {
-            margin: 18px 0 6px;
-            font-family: var(--mono);
-            font-size: 11px;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-            color: var(--code-dim);
-        }
-        .toc a {
-            display: flex;
-            gap: 8px;
-            padding: 4px 10px;
-            border-left: 2px solid var(--line);
-            color: var(--muted);
-        }
-        .toc a:hover {
-            color: var(--ink);
-            text-decoration: none;
-        }
-        .toc a.active {
-            border-left-color: var(--accent);
-            color: var(--ink);
-            font-weight: 500;
-        }
-        .toc a b {
-            min-width: 22px;
-            font-family: var(--mono);
-            font-size: 11.5px;
-            font-weight: 500;
-            color: var(--code-dim);
-        }
+            body {
+                margin: 0;
+                padding: 0 16px;
+                background: var(--page);
+                color: var(--ink);
+                font-family: var(--sans);
+                font-size: 15px;
+                line-height: 1.65;
+                -webkit-font-smoothing: antialiased;
+                /* JetBrains Mono would draw === and !== as single symbols, show the characters devs type */
+                font-variant-ligatures: none;
+            }
 
-        /* intro */
-        .intro {
-            max-width: 900px;
-            margin-bottom: 32px;
-        }
-        h1 {
-            margin: 0 0 10px;
-            font-size: 32px;
-            line-height: 1.2;
-            letter-spacing: -.02em;
-            text-wrap: balance;
-        }
-        .lede {
-            margin: 0;
-            font-size: 17px;
-            color: var(--muted);
-        }
-        h2 {
-            margin: 0 0 8px;
-            font-size: 21px;
-            letter-spacing: -.01em;
-            text-wrap: balance;
-        }
-        h3 {
-            margin: 24px 0 8px;
-            font-size: 15px;
-        }
-        p {
-            margin: 0 0 14px;
-        }
-        ul,
-        ol {
-            margin: 0 0 14px;
-            padding-left: 22px;
-        }
-        li {
-            margin-bottom: 6px;
-        }
-        .eyebrow {
-            margin: 0 0 6px;
-            font-family: var(--mono);
-            font-size: 11.5px;
-            font-weight: 600;
-            letter-spacing: .1em;
-            text-transform: uppercase;
-            color: var(--accent);
-        }
-        .endpoint {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin: 2px 0 14px;
-            padding: 5px 10px 5px 5px;
-            border: 1px solid var(--line);
-            border-radius: 6px;
-            background: var(--card);
-            font-family: var(--mono);
-            font-size: 13px;
-        }
-        .method {
-            padding: 1px 7px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: .04em;
-            color: #ffffff;
-        }
-        .method.get {
-            background: var(--get);
-        }
-        .method.post {
-            background: var(--post);
-        }
-        .method.js {
-            background: #8a6d00;
-        }
-        .ref {
-            margin: -6px 0 14px;
-            font-size: 13px;
-            color: var(--muted);
-        }
-        .ref a::after {
-            content: " \2197";
-        }
+            a {
+                color: var(--accent);
+                text-decoration: none;
+            }
 
-        /* step rows: explanation | code */
-        .row {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-            gap: 48px;
-            padding-block: 36px;
-            border-top: 1px solid var(--line);
-        }
-        .row > div {
-            min-width: 0;
-        }
-        .example {
-            align-self: start;
-            position: sticky;
-            top: 16px;
-        }
-        .example .label {
-            margin: 0 0 8px;
-            font-family: var(--mono);
-            font-size: 11px;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-        .example pre,
-        .code-tabs {
-            margin: 0 0 16px;
-            border: 1px solid var(--code-line);
-            border-radius: 10px;
-            background: var(--code-bg);
-            box-shadow: 0 8px 24px rgba(11, 18, 32, .12);
-        }
-        .example pre {
-            padding: 16px 18px;
-            overflow-x: auto;
-            color: var(--code-ink);
-            font-family: var(--mono);
-            font-size: 12.8px;
-            line-height: 1.65;
-        }
-        .example pre code {
-            padding: 0;
-            border: 0;
-            background: none;
-            color: inherit;
-            font-size: inherit;
-        }
-        .example pre em {
-            font-style: normal;
-            color: #f5c26b;
-        }
-        .code-tabs {
-            overflow: hidden;
-        }
-        .code-tabs .tabs {
-            display: flex;
-            gap: 2px;
-            padding: 0 8px;
-            border-bottom: 1px solid var(--code-line);
-            background: var(--code-bar);
-            overflow-x: auto;
-        }
-        .code-tabs button {
-            padding: 9px 10px 8px;
-            border: 0;
-            border-bottom: 2px solid transparent;
-            background: none;
-            color: var(--code-dim);
-            font-family: var(--mono);
-            font-size: 12px;
-            white-space: nowrap;
-            cursor: pointer;
-        }
-        .code-tabs button:hover {
-            color: var(--code-ink);
-        }
-        .code-tabs button[aria-selected="true"] {
-            color: #ffffff;
-            border-bottom-color: var(--accent);
-        }
-        .code-tabs button:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: -2px;
-        }
-        .example .code-tabs pre {
-            margin: 0;
-            border: 0;
-            border-radius: 0;
-            box-shadow: none;
-        }
-        @media (max-width: 1100px) {
+            a:hover {
+                text-decoration: underline;
+            }
+
+            code {
+                font-family: var(--mono);
+                font-size: .86em;
+                padding: 1px 5px;
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                background: var(--card);
+            }
+
+            /* shell */
             .shell {
-                grid-template-columns: minmax(0, 1fr);
-                gap: 0;
-                width: 100%;
+                display: grid;
+                grid-template-columns: 220px minmax(0, 1fr);
+                gap: 48px;
+                width: 80%;
+                margin: 0 auto;
             }
+
+            main {
+                min-width: 0;
+                padding-block: 48px 96px;
+            }
+
+            /* table of contents */
             .toc {
+                position: sticky;
+                top: 0;
+                align-self: start;
+                max-height: 100vh;
+                overflow-y: auto;
+                padding-block: 48px 24px;
+                font-size: 13.5px;
+            }
+
+            .toc .brand {
+                margin: 0 0 24px;
+                font-family: var(--mono);
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: .04em;
+                color: var(--ink);
+            }
+
+            .toc .brand span {
+                color: var(--accent);
+            }
+
+            .toc p {
+                margin: 18px 0 6px;
+                font-family: var(--mono);
+                font-size: 11px;
+                letter-spacing: .08em;
+                text-transform: uppercase;
+                color: var(--code-dim);
+            }
+
+            .toc a {
+                display: flex;
+                gap: 8px;
+                padding: 4px 10px;
+                border-left: 2px solid var(--line);
+                color: var(--muted);
+            }
+
+            .toc a:hover {
+                color: var(--ink);
+                text-decoration: none;
+            }
+
+            .toc a.active {
+                border-left-color: var(--accent);
+                color: var(--ink);
+                font-weight: 500;
+            }
+
+            .toc a b {
+                min-width: 22px;
+                font-family: var(--mono);
+                font-size: 11.5px;
+                font-weight: 500;
+                color: var(--code-dim);
+            }
+
+            /* intro */
+            .intro {
+                max-width: 900px;
+                margin-bottom: 32px;
+            }
+
+            h1 {
+                margin: 0 0 10px;
+                font-size: 32px;
+                line-height: 1.2;
+                letter-spacing: -.02em;
+                text-wrap: balance;
+            }
+
+            .lede {
+                margin: 0;
+                font-size: 17px;
+                color: var(--muted);
+            }
+
+            h2 {
+                margin: 0 0 8px;
+                font-size: 21px;
+                letter-spacing: -.01em;
+                text-wrap: balance;
+            }
+
+            h3 {
+                margin: 24px 0 8px;
+                font-size: 15px;
+            }
+
+            p {
+                margin: 0 0 14px;
+            }
+
+            ul,
+            ol {
+                margin: 0 0 14px;
+                padding-left: 22px;
+            }
+
+            li {
+                margin-bottom: 6px;
+            }
+
+            .eyebrow {
+                margin: 0 0 6px;
+                font-family: var(--mono);
+                font-size: 11.5px;
+                font-weight: 600;
+                letter-spacing: .1em;
+                text-transform: uppercase;
+                color: var(--accent);
+            }
+
+            .endpoint {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                margin: 2px 0 14px;
+                padding: 5px 10px 5px 5px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                background: var(--card);
+                font-family: var(--mono);
+                font-size: 13px;
+            }
+
+            .method {
+                padding: 1px 7px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .04em;
+                color: #ffffff;
+            }
+
+            .method.get {
+                background: var(--get);
+            }
+
+            .method.post {
+                background: var(--post);
+            }
+
+            .method.js {
+                background: #8a6d00;
+            }
+
+            .ref {
+                margin: -6px 0 14px;
+                font-size: 13px;
+                color: var(--muted);
+            }
+
+            .ref a::after {
+                content: " \2197";
+            }
+
+            /* step rows: explanation | code */
+            .row {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+                gap: 48px;
+                padding-block: 36px;
+                border-top: 1px solid var(--line);
+            }
+
+            .row>div {
+                min-width: 0;
+            }
+
+            .example {
+                align-self: start;
+                position: sticky;
+                top: 16px;
+            }
+
+            .example .label {
+                margin: 0 0 8px;
+                font-family: var(--mono);
+                font-size: 11px;
+                letter-spacing: .08em;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+
+            .example pre,
+            .code-tabs {
+                margin: 0 0 16px;
+                border: 1px solid var(--code-line);
+                border-radius: 10px;
+                background: var(--code-bg);
+                box-shadow: 0 8px 24px rgba(11, 18, 32, .12);
+            }
+
+            .example pre {
+                padding: 16px 18px;
+                overflow-x: auto;
+                color: var(--code-ink);
+                font-family: var(--mono);
+                font-size: 12.8px;
+                line-height: 1.65;
+            }
+
+            .example pre code {
+                padding: 0;
+                border: 0;
+                background: none;
+                color: inherit;
+                font-size: inherit;
+            }
+
+            .example pre em {
+                font-style: normal;
+                color: #f5c26b;
+            }
+
+            .code-tabs {
+                overflow: hidden;
+            }
+
+            .code-tabs .tabs {
+                display: flex;
+                gap: 2px;
+                padding: 0 8px;
+                border-bottom: 1px solid var(--code-line);
+                background: var(--code-bar);
+                overflow-x: auto;
+            }
+
+            .code-tabs button {
+                padding: 9px 10px 8px;
+                border: 0;
+                border-bottom: 2px solid transparent;
+                background: none;
+                color: var(--code-dim);
+                font-family: var(--mono);
+                font-size: 12px;
+                white-space: nowrap;
+                cursor: pointer;
+            }
+
+            .code-tabs button:hover {
+                color: var(--code-ink);
+            }
+
+            .code-tabs button[aria-selected="true"] {
+                color: #ffffff;
+                border-bottom-color: var(--accent);
+            }
+
+            .code-tabs button:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: -2px;
+            }
+
+            .example .code-tabs pre {
+                margin: 0;
+                border: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            @media (max-width: 1100px) {
+                .shell {
+                    grid-template-columns: minmax(0, 1fr);
+                    gap: 0;
+                    width: 100%;
+                }
+
+                .toc {
+                    display: none;
+                }
+            }
+
+            @media (max-width: 900px) {
+                .row {
+                    grid-template-columns: minmax(0, 1fr);
+                    gap: 8px;
+                }
+
+                .example {
+                    position: static;
+                }
+            }
+
+            /* environment select */
+            .env-select {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                margin: 4px 0 14px;
+                font-family: var(--mono);
+                font-size: 12px;
+                letter-spacing: .06em;
+                text-transform: uppercase;
+                color: var(--muted);
+            }
+
+            .env-select select {
+                padding: 7px 34px 7px 12px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235b6577' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right 12px center / 10px no-repeat;
+                appearance: none;
+                color: var(--ink);
+                font-family: var(--sans);
+                font-size: 14px;
+                font-weight: 500;
+                letter-spacing: 0;
+                text-transform: none;
+                cursor: pointer;
+            }
+
+            .env-select select:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 2px;
+            }
+
+            .env-warning {
+                padding: 8px 12px;
+                border-left: 3px solid var(--warn);
+                border-radius: 0 6px 6px 0;
+                background: #fff1e8;
+                color: var(--warn);
+                font-size: 13.5px;
+            }
+
+            /* LLM actions */
+            .llm-actions {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                margin-top: 14px;
+            }
+
+            .llm-link {
+                padding: 6px 12px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                background: var(--card);
+                color: var(--ink);
+                font: 500 13px var(--sans);
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            .llm-link:hover {
+                border-color: var(--accent);
+                color: var(--accent);
+            }
+
+            .llm-link:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 1px;
+            }
+
+            /* AI editor box */
+            .ai-editor {
+                margin-top: 14px;
+                border: 1px solid var(--line);
+                border-radius: 6px;
+                background: var(--card);
+            }
+
+            .ai-editor summary {
+                padding: 6px 12px;
+                font: 500 13px var(--sans);
+                color: var(--ink);
+                cursor: pointer;
+            }
+
+            .ai-editor summary:hover {
+                color: var(--accent);
+            }
+
+            .ai-editor summary:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 1px;
+            }
+
+            .ai-editor[open] summary {
+                border-bottom: 1px solid var(--line);
+            }
+
+            .ai-editor>p {
+                margin: 12px 12px 0;
+                font-size: 13px;
+                color: var(--muted);
+            }
+
+            .ai-editor .example {
+                position: static;
+                padding: 12px;
+            }
+
+            .ai-editor .example pre:last-child {
+                margin-bottom: 0;
+            }
+
+            /* copy buttons */
+            .copy {
+                padding: 3px 9px;
+                border: 1px solid var(--code-line);
+                border-radius: 6px;
+                background: var(--code-bar);
+                color: var(--code-dim);
+                font-family: var(--mono);
+                font-size: 11.5px;
+                cursor: pointer;
+            }
+
+            .copy:hover {
+                color: #ffffff;
+                border-color: #33415c;
+            }
+
+            .copy:focus-visible {
+                outline: 2px solid var(--accent);
+                outline-offset: 1px;
+            }
+
+            .copy.done {
+                color: #7ee2b8;
+                border-color: #1f6b4f;
+            }
+
+            .code-tabs .tabs .copy {
+                align-self: center;
+                margin-left: auto;
+                border-bottom: 1px solid var(--code-line);
+                padding: 3px 9px;
+            }
+
+            .example>pre {
+                position: relative;
+            }
+
+            .example>pre>.copy {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+            }
+
+            /* parameter table */
+            .table-wrap {
+                overflow-x: auto;
+                margin: 8px 0 16px;
+                border: 1px solid var(--line);
+                border-radius: 8px;
+                background: var(--card);
+            }
+
+            .table-wrap table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 13.5px;
+            }
+
+            .table-wrap th,
+            .table-wrap td {
+                text-align: left;
+                vertical-align: top;
+                padding: 9px 12px;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .table-wrap tr:last-child td {
+                border-bottom: 0;
+            }
+
+            .table-wrap th {
+                font-family: var(--mono);
+                font-size: 11px;
+                font-weight: 600;
+                letter-spacing: .06em;
+                text-transform: uppercase;
+                color: var(--muted);
+                background: var(--page);
+            }
+
+            .table-wrap td:first-child code {
+                white-space: nowrap;
+                color: var(--accent);
+            }
+
+            /* choose your integration */
+            .choose {
+                padding-block: 36px;
+                border-top: 1px solid var(--line);
+            }
+
+            .choose .pickers {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
+                gap: 12px;
+            }
+
+            .choose .modes {
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            }
+
+            @media (max-width: 900px) {
+                .choose .pickers {
+                    grid-template-columns: minmax(0, 1fr);
+                }
+            }
+
+            .choose h3 {
+                margin: 16px 0 4px;
+                font-family: var(--sans);
+                font-size: 16px;
+                font-weight: 600;
+                letter-spacing: -.005em;
+                line-height: 1.35;
+                color: var(--ink);
+                text-wrap: balance;
+            }
+
+            .choose h3+p {
+                font-size: 13.5px;
+                color: var(--muted);
+            }
+
+            .modes {
+                display: grid;
+                gap: 10px;
+            }
+
+            .modes label {
+                position: relative;
+                display: block;
+                padding: 14px 44px 14px 16px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--card);
+                cursor: pointer;
+                transition: border-color .15s, box-shadow .15s, background-color .15s;
+            }
+
+            .modes label:hover {
+                border-color: #c5ccd8;
+            }
+
+            .modes label:has(input:checked) {
+                border-color: var(--accent);
+                background: var(--accent-bg);
+                box-shadow: 0 0 0 1px var(--accent);
+            }
+
+            .modes label:has(input:focus-visible) {
+                outline: 2px solid var(--accent);
+                outline-offset: 2px;
+            }
+
+            .modes input {
+                position: absolute;
+                opacity: 0;
+                pointer-events: none;
+            }
+
+            .modes label::after {
+                content: "";
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                width: 18px;
+                height: 18px;
+                border: 1.5px solid #c5ccd8;
+                border-radius: 50%;
+                background: var(--card) center / 10px no-repeat;
+            }
+
+            .modes label:has(input:checked)::after {
+                border-color: var(--accent);
+                background-color: var(--accent);
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8'%3E%3Cpath d='M1 4l3 3 5-6' fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            }
+
+            .modes strong {
+                display: block;
+                font-size: 14.5px;
+                color: var(--ink);
+            }
+
+            .modes span {
+                display: block;
+                font-size: 13.5px;
+                line-height: 1.5;
+                color: var(--muted);
+            }
+
+            .modes code.flag {
+                float: right;
+                margin-left: 8px;
+                font-size: 11px;
+                color: var(--muted);
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .modes label {
+                    transition: none;
+                }
+            }
+
+            .gate-note {
+                padding: 14px 18px;
+                border: 1px dashed #c5ccd8;
+                border-radius: 10px;
+                color: var(--muted);
+                font-size: 14px;
+            }
+
+            /* hold timeline */
+            .timeline {
+                margin: 20px 0 0;
+                padding: 18px 20px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--card);
+            }
+
+            .timeline h4 {
+                margin: 0 0 14px;
+                font-size: 14px;
+            }
+
+            .timeline ol {
+                position: relative;
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            .timeline li {
+                position: relative;
+                margin: 0;
+                padding: 0 0 14px 28px;
+                font-size: 14px;
+            }
+
+            .timeline li::before {
+                content: "";
+                position: absolute;
+                left: 5px;
+                top: 7px;
+                width: 9px;
+                height: 9px;
+                border-radius: 50%;
+                background: var(--accent);
+            }
+
+            .timeline li::after {
+                content: "";
+                position: absolute;
+                left: 9px;
+                top: 18px;
+                bottom: 0;
+                width: 1px;
+                background: var(--line);
+            }
+
+            .timeline li:last-child {
+                padding-bottom: 0;
+            }
+
+            .timeline li:last-child::after {
                 display: none;
             }
-        }
-        @media (max-width: 900px) {
-            .row {
-                grid-template-columns: minmax(0, 1fr);
-                gap: 8px;
+
+            .timeline li.bad::before {
+                background: var(--warn);
             }
-            .example {
-                position: static;
+
+            .timeline .when {
+                display: block;
+                font-family: var(--mono);
+                font-size: 11.5px;
+                color: var(--muted);
             }
-        }
 
-        /* environment select */
-        .env-select {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin: 4px 0 14px;
-            font-family: var(--mono);
-            font-size: 12px;
-            letter-spacing: .06em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-        .env-select select {
-            padding: 7px 34px 7px 12px;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%235b6577' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right 12px center / 10px no-repeat;
-            appearance: none;
-            color: var(--ink);
-            font-family: var(--sans);
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: 0;
-            text-transform: none;
-            cursor: pointer;
-        }
-        .env-select select:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-        .env-warning {
-            padding: 8px 12px;
-            border-left: 3px solid var(--warn);
-            border-radius: 0 6px 6px 0;
-            background: #fff1e8;
-            color: var(--warn);
-            font-size: 13.5px;
-        }
-
-        /* LLM actions */
-        .llm-actions {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 8px;
-            margin-top: 14px;
-        }
-        .llm-link {
-            padding: 6px 12px;
-            border: 1px solid var(--line);
-            border-radius: 6px;
-            background: var(--card);
-            color: var(--ink);
-            font: 500 13px var(--sans);
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .llm-link:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-        .llm-link:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 1px;
-        }
-
-        /* AI editor box */
-        .ai-editor {
-            margin-top: 14px;
-            border: 1px solid var(--line);
-            border-radius: 6px;
-            background: var(--card);
-        }
-        .ai-editor summary {
-            padding: 6px 12px;
-            font: 500 13px var(--sans);
-            color: var(--ink);
-            cursor: pointer;
-        }
-        .ai-editor summary:hover {
-            color: var(--accent);
-        }
-        .ai-editor summary:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 1px;
-        }
-        .ai-editor[open] summary {
-            border-bottom: 1px solid var(--line);
-        }
-        .ai-editor > p {
-            margin: 12px 12px 0;
-            font-size: 13px;
-            color: var(--muted);
-        }
-        .ai-editor .example {
-            position: static;
-            padding: 12px;
-        }
-        .ai-editor .example pre:last-child {
-            margin-bottom: 0;
-        }
-
-        /* copy buttons */
-        .copy {
-            padding: 3px 9px;
-            border: 1px solid var(--code-line);
-            border-radius: 6px;
-            background: var(--code-bar);
-            color: var(--code-dim);
-            font-family: var(--mono);
-            font-size: 11.5px;
-            cursor: pointer;
-        }
-        .copy:hover {
-            color: #ffffff;
-            border-color: #33415c;
-        }
-        .copy:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 1px;
-        }
-        .copy.done {
-            color: #7ee2b8;
-            border-color: #1f6b4f;
-        }
-        .code-tabs .tabs .copy {
-            align-self: center;
-            margin-left: auto;
-            border-bottom: 1px solid var(--code-line);
-            padding: 3px 9px;
-        }
-        .example > pre {
-            position: relative;
-        }
-        .example > pre > .copy {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-        }
-
-        /* parameter table */
-        .table-wrap {
-            overflow-x: auto;
-            margin: 8px 0 16px;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: var(--card);
-        }
-        .table-wrap table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13.5px;
-        }
-        .table-wrap th,
-        .table-wrap td {
-            text-align: left;
-            vertical-align: top;
-            padding: 9px 12px;
-            border-bottom: 1px solid var(--line);
-        }
-        .table-wrap tr:last-child td {
-            border-bottom: 0;
-        }
-        .table-wrap th {
-            font-family: var(--mono);
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: .06em;
-            text-transform: uppercase;
-            color: var(--muted);
-            background: var(--page);
-        }
-        .table-wrap td:first-child code {
-            white-space: nowrap;
-            color: var(--accent);
-        }
-
-        /* choose your integration */
-        .choose {
-            padding-block: 36px;
-            border-top: 1px solid var(--line);
-        }
-        .choose .pickers {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr);
-            gap: 12px;
-        }
-        .choose .modes {
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        }
-        @media (max-width: 900px) {
-            .choose .pickers {
-                grid-template-columns: minmax(0, 1fr);
+            .timeline .status {
+                font-family: var(--mono);
+                font-size: 11.5px;
+                font-weight: 600;
+                padding: 0 6px;
+                border-radius: 4px;
+                background: var(--accent-bg);
+                color: var(--accent);
             }
-        }
-        .choose h3 {
-            margin: 16px 0 4px;
-            font-family: var(--sans);
-            font-size: 16px;
-            font-weight: 600;
-            letter-spacing: -.005em;
-            line-height: 1.35;
-            color: var(--ink);
-            text-wrap: balance;
-        }
-        .choose h3 + p {
-            font-size: 13.5px;
-            color: var(--muted);
-        }
-        .modes {
-            display: grid;
-            gap: 10px;
-        }
-        .modes label {
-            position: relative;
-            display: block;
-            padding: 14px 44px 14px 16px;
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            background: var(--card);
-            cursor: pointer;
-            transition: border-color .15s, box-shadow .15s, background-color .15s;
-        }
-        .modes label:hover {
-            border-color: #c5ccd8;
-        }
-        .modes label:has(input:checked) {
-            border-color: var(--accent);
-            background: var(--accent-bg);
-            box-shadow: 0 0 0 1px var(--accent);
-        }
-        .modes label:has(input:focus-visible) {
-            outline: 2px solid var(--accent);
-            outline-offset: 2px;
-        }
-        .modes input {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-        }
-        .modes label::after {
-            content: "";
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 18px;
-            height: 18px;
-            border: 1.5px solid #c5ccd8;
-            border-radius: 50%;
-            background: var(--card) center / 10px no-repeat;
-        }
-        .modes label:has(input:checked)::after {
-            border-color: var(--accent);
-            background-color: var(--accent);
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 8'%3E%3Cpath d='M1 4l3 3 5-6' fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-        }
-        .modes strong {
-            display: block;
-            font-size: 14.5px;
-            color: var(--ink);
-        }
-        .modes span {
-            display: block;
-            font-size: 13.5px;
-            line-height: 1.5;
-            color: var(--muted);
-        }
-        .modes code.flag {
-            float: right;
-            margin-left: 8px;
-            font-size: 11px;
-            color: var(--muted);
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .modes label {
-                transition: none;
+
+            .timeline .bad .status {
+                background: #fff1e8;
+                color: var(--warn);
             }
-        }
 
-        .gate-note {
-            padding: 14px 18px;
-            border: 1px dashed #c5ccd8;
-            border-radius: 10px;
-            color: var(--muted);
-            font-size: 14px;
-        }
+            .timeline .foot {
+                margin: 14px 0 0;
+                font-size: 13px;
+                color: var(--muted);
+            }
 
-        /* hold timeline */
-        .timeline {
-            margin: 20px 0 0;
-            padding: 18px 20px;
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            background: var(--card);
-        }
-        .timeline h4 {
-            margin: 0 0 14px;
-            font-size: 14px;
-        }
-        .timeline ol {
-            position: relative;
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-        .timeline li {
-            position: relative;
-            margin: 0;
-            padding: 0 0 14px 28px;
-            font-size: 14px;
-        }
-        .timeline li::before {
-            content: "";
-            position: absolute;
-            left: 5px;
-            top: 7px;
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            background: var(--accent);
-        }
-        .timeline li::after {
-            content: "";
-            position: absolute;
-            left: 9px;
-            top: 18px;
-            bottom: 0;
-            width: 1px;
-            background: var(--line);
-        }
-        .timeline li:last-child {
-            padding-bottom: 0;
-        }
-        .timeline li:last-child::after {
-            display: none;
-        }
-        .timeline li.bad::before {
-            background: var(--warn);
-        }
-        .timeline .when {
-            display: block;
-            font-family: var(--mono);
-            font-size: 11.5px;
-            color: var(--muted);
-        }
-        .timeline .status {
-            font-family: var(--mono);
-            font-size: 11.5px;
-            font-weight: 600;
-            padding: 0 6px;
-            border-radius: 4px;
-            background: var(--accent-bg);
-            color: var(--accent);
-        }
-        .timeline .bad .status {
-            background: #fff1e8;
-            color: var(--warn);
-        }
-        .timeline .foot {
-            margin: 14px 0 0;
-            font-size: 13px;
-            color: var(--muted);
-        }
+            /* try it */
+            .try {
+                padding-block: 36px 0;
+                border-top: 1px solid var(--line);
+            }
 
-        /* try it */
-        .try {
-            padding-block: 36px 0;
-            border-top: 1px solid var(--line);
-        }
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 12px;
-        }
-        .cards a {
-            display: block;
-            padding: 16px 18px;
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            background: var(--card);
-            color: var(--ink);
-        }
-        .cards a:hover {
-            border-color: var(--accent);
-            text-decoration: none;
-        }
-        .cards strong {
-            display: block;
-            margin-bottom: 4px;
-            font-family: var(--mono);
-            font-size: 13px;
-            color: var(--accent);
-        }
-        .cards span {
-            display: block;
-            font-size: 14px;
-            color: var(--muted);
-        }
-    </style>
-</head>
-<body>
-<div class="shell">
-<nav class="toc" aria-label="On this page">
-    <p class="brand">MyTicketPro<span>/</span>widget</p>
-    <a href="#choose"><b>&rarr;</b>Choose your setup</a>
-    <div id="toc-guide" hidden>
-    <p>Setup</p>
-    <a href="#hosts"><b>01</b>Environment</a>
-    <a href="#auth"><b>02</b>Authentication</a>
-    <p>Create</p>
-    <a href="#product"><b>1a</b>Find productId</a>
-    <a href="#availability"><b>1b</b>Find availabilityId</a>
-    <a href="#create"><b>1c</b>Create the widget</a>
-    <p>Show</p>
-    <a href="#embed" data-mode="postmessage"><b>2</b>Embed and listen</a>
-    <a href="#send" data-mode="redirect" hidden><b>2</b>Send the shopper</a>
-    <p>Finish</p>
-    <a href="#result"><b>3a</b>Read the result</a>
-    <a href="#book" data-booking="manual" hidden><b>3b</b>Hold the seats</a>
-    <a href="#confirm"><b>3c</b>Confirm</a>
-    <p>Test</p>
-    <a href="#try"><b>&#9654;</b>Try it</a>
-    </div>
-</nav>
-<main>
+            .cards {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 12px;
+            }
 
-    <div class="intro">
-        <h1>MyTicketPro widget &mdash; integration guide</h1>
-        <p class="lede">
-            A hosted seat-selection page for OCTO resellers. Full reference:
-            <a href="https://www.postman.com/myticketpro/myticketpro-developers">Postman</a>, Widget Life Cycle Guide.
-        </p>
-        <div class="llm-actions">
-            <a class="llm-link" target="_blank" rel="noopener" href="https://claude.ai/new?q=Read%20the%20MyTicketPro%20OCTO%20API%20documentation%20at%20https%3A%2F%2Fwww.postman.com%2Fcollections%2F36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea%20and%20help%20me%20integrate%20the%20MyTicketPro%20widget.">Ask Claude</a>
-            <a class="llm-link" target="_blank" rel="noopener" href="https://chatgpt.com/?q=Read%20the%20MyTicketPro%20OCTO%20API%20documentation%20at%20https%3A%2F%2Fwww.postman.com%2Fcollections%2F36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea%20and%20help%20me%20integrate%20the%20MyTicketPro%20widget.">Ask ChatGPT</a>
-        </div>
-        <details class="ai-editor">
-            <summary>Use with your AI editor</summary>
-            <p>Gives your AI these docs. No token needed.</p>
-            <div class="example">
-                <p class="label">Claude Code</p>
-                <pre><code>claude mcp add --transport http myticketpro https://api.sandbox.myticketpro.app/mcp</code></pre>
-                <p class="label">Cursor (.cursor/mcp.json)</p>
-                <pre><code>{
-  "mcpServers": {
-    "myticketpro": {
-      "url": "https://api.sandbox.myticketpro.app/mcp"
-    }
-  }
-}</code></pre>
-                <p class="label">VS Code (.vscode/mcp.json)</p>
-                <pre><code>{
-  "servers": {
-    "myticketpro": {
-      "type": "http",
-      "url": "https://api.sandbox.myticketpro.app/mcp"
-    }
-  }
-}</code></pre>
-                <p class="label">Codex</p>
-                <pre><code>codex mcp add myticketpro --url https://api.sandbox.myticketpro.app/mcp</code></pre>
-                <p class="label">Codex (~/.codex/config.toml)</p>
-                <pre><code>[mcp_servers.myticketpro]
-url = "https://api.sandbox.myticketpro.app/mcp"</code></pre>
-                <p class="label">claude.ai: Settings → Connectors → Add custom connector</p>
-                <pre><code>https://api.sandbox.myticketpro.app/mcp</code></pre>
-                <p class="label">ChatGPT: Settings → Apps &amp; Connectors → Developer mode → Create, authentication: none</p>
-                <pre><code>https://api.sandbox.myticketpro.app/mcp</code></pre>
-            </div>
-        </details>
-    </div>
+            .cards a {
+                display: block;
+                padding: 16px 18px;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                background: var(--card);
+                color: var(--ink);
+            }
 
-    <section class="choose">
-        <p class="eyebrow">Start here</p>
-        <h2 id="choose">Choose your setup</h2>
-        <p>Answer both questions. The guide below then shows only the steps and code for your setup.</p>
-        <div class="pickers stacked">
-            <div>
-                <h3>Which flow?</h3>
-                <p>How the shopper's selection gets back to you.</p>
-                <div class="modes">
-                        <label>
-                            <input type="radio" name="mode" id="mode-postmessage" value="postmessage">
-                            <span><strong>Iframe <code class="flag">returnUrl: null</code></strong>The widget sits in an iframe on your page. You receive the selection as messages.</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="mode" id="mode-redirect" value="redirect">
-                            <span><strong>Redirect <code class="flag">returnUrl: "https://&hellip;"</code></strong>The shopper goes to the widget page and comes back to your <code>returnUrl</code></span>
-                        </label>
+            .cards a:hover {
+                border-color: var(--accent);
+                text-decoration: none;
+            }
+
+            .cards strong {
+                display: block;
+                margin-bottom: 4px;
+                font-family: var(--mono);
+                font-size: 13px;
+                color: var(--accent);
+            }
+
+            .cards span {
+                display: block;
+                font-size: 14px;
+                color: var(--muted);
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="shell">
+            <nav class="toc" aria-label="On this page">
+                <p class="brand">MyTicketPro<span>/</span>widget</p>
+                <a href="#choose"><b>&rarr;</b>Choose your setup</a>
+                <div id="toc-guide" hidden>
+                    <p>Setup</p>
+                    <a href="#hosts"><b>01</b>Environment</a>
+                    <a href="#auth"><b>02</b>Authentication</a>
+                    <p>Create</p>
+                    <a href="#product"><b>1a</b>Find productId</a>
+                    <a href="#availability"><b>1b</b>Find availabilityId</a>
+                    <a href="#create"><b>1c</b>Create the widget</a>
+                    <p>Show</p>
+                    <a href="#embed" data-mode="postmessage"><b>2</b>Embed and listen</a>
+                    <a href="#send" data-mode="redirect" hidden><b>2</b>Send the shopper</a>
+                    <p>Finish</p>
+                    <a href="#result"><b>3a</b>Read the result</a>
+                    <a href="#book" data-booking="manual" hidden><b>3b</b>Hold the seats</a>
+                    <a href="#confirm"><b>3c</b>Confirm</a>
+                    <p>Test</p>
+                    <a href="#try"><b>&#9654;</b>Try it</a>
+                </div>
+            </nav>
+            <main>
+
+                <div class="intro">
+                    <h1>MyTicketPro widget &mdash; integration guide</h1>
+                    <p class="lede">
+                        A hosted seat-selection page for OCTO resellers.
+                    </p>
+                    <div class="llm-actions">
+                        <a class="llm-link" target="_blank" rel="noopener"
+                            href="https://claude.ai/new?q=Read%20the%20MyTicketPro%20OCTO%20API%20documentation%20at%20https%3A%2F%2Fwww.postman.com%2Fcollections%2F36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea%20and%20help%20me%20integrate%20the%20MyTicketPro%20widget.">Ask
+                            Claude</a>
+                        <a class="llm-link" target="_blank" rel="noopener"
+                            href="https://chatgpt.com/?q=Read%20the%20MyTicketPro%20OCTO%20API%20documentation%20at%20https%3A%2F%2Fwww.postman.com%2Fcollections%2F36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea%20and%20help%20me%20integrate%20the%20MyTicketPro%20widget.">Ask
+                            ChatGPT</a>
                     </div>
-            </div>
-            <div>
-                <h3>Should we automatically hold the seats for you?</h3>
-                <p>Whether the seats are reserved as soon as the shopper finishes.</p>
-                <div class="modes">
-                        <label>
-                            <input type="radio" name="booking" id="booking-auto" value="auto">
-                            <span><strong>Yes, hold them automatically <code class="flag">createBooking: true</code></strong>Recommended. Right after the shopper completes their selection, the seats are taken out of inventory for <code>booking.expirationMinutes</code> (15 minutes by default). Your server only confirms.</span>
-                        </label>
-                        <label>
-                            <input type="radio" name="booking" id="booking-manual" value="manual">
-                            <span><strong>No, my server will hold them <code class="flag">createBooking: false</code></strong>Nothing is taken out of inventory when the shopper completes their selection. Your server holds the seats with an extra call, then confirms.</span>
-                        </label>
+                    <details class="ai-editor">
+                        <summary>Use with your AI editor</summary>
+                        <p>Gives your AI these docs. No token needed.</p>
+                        <div class="example">
+                            <p class="label">Claude Code</p>
+                            <pre><code>
+                                claude mcp add --transport http myticketpro https://api.sandbox.myticketpro.app/mcp
+                            </code></pre>
+                            <p class="label">Cursor (.cursor/mcp.json)</p>
+                            <pre><code>
+                                {
+                                  "mcpServers": {
+                                    "myticketpro": {
+                                      "url": "https://api.sandbox.myticketpro.app/mcp"
+                                    }
+                                  }
+                                }
+                            </code></pre>
+                            <p class="label">VS Code (.vscode/mcp.json)</p>
+                            <pre><code>
+                                {
+                                  "servers": {
+                                    "myticketpro": {
+                                      "type": "http",
+                                      "url": "https://api.sandbox.myticketpro.app/mcp"
+                                    }
+                                  }
+                                }
+                            </code></pre>
+                            <p class="label">Codex</p>
+                            <pre><code>
+                                codex mcp add myticketpro --url https://api.sandbox.myticketpro.app/mcp
+                            </code></pre>
+                            <p class="label">Codex (~/.codex/config.toml)</p>
+                            <pre><code>
+                                [mcp_servers.myticketpro]
+                                url = "https://api.sandbox.myticketpro.app/mcp"
+                            </code></pre>
+                            <p class="label">claude.ai: Settings → Connectors → Add custom connector</p>
+                            <pre><code>
+                                https://api.sandbox.myticketpro.app/mcp
+                            </code></pre>
+                            <p class="label">ChatGPT: Settings → Apps &amp; Connectors → Developer mode → Create,
+                                authentication: none</p>
+                            <pre><code>
+                                https://api.sandbox.myticketpro.app/mcp
+                            </code></pre>
+                        </div>
+                    </details>
+                </div>
+
+                <section class="choose">
+                    <p class="eyebrow">Start here</p>
+                    <h2 id="choose">Choose your setup</h2>
+                    <p>Answer both questions. The guide below then shows only the steps and code for your setup.</p>
+                    <div class="pickers stacked">
+                        <div>
+                            <h3>Which flow?</h3>
+                            <p>How the shopper's selection gets back to you.</p>
+                            <div class="modes">
+                                <label>
+                                    <input type="radio" name="mode" id="mode-postmessage" value="postmessage">
+                                    <span><strong>Iframe <code class="flag">returnUrl: null</code></strong>The widget
+                                        sits in an iframe on your page. You receive the selection as messages.</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="mode" id="mode-redirect" value="redirect">
+                                    <span><strong>Redirect <code
+                                                class="flag">returnUrl: "https://&hellip;"</code></strong>The shopper
+                                        goes to the widget page and comes back to your <code>returnUrl</code></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <h3>Should we automatically hold the seats for you?</h3>
+                            <p>Whether the seats are reserved as soon as the shopper finishes.</p>
+                            <div class="modes">
+                                <label>
+                                    <input type="radio" name="booking" id="booking-auto" value="auto">
+                                    <span><strong>Yes, hold them automatically <code
+                                                class="flag">createBooking: true</code></strong>Recommended. Right after
+                                        the shopper completes their selection, the seats are taken out of inventory for
+                                        <code>booking.expirationMinutes</code> (15 minutes by default). Your server only
+                                        confirms.</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="booking" id="booking-manual" value="manual">
+                                    <span><strong>No, my server will hold them <code
+                                                class="flag">createBooking: false</code></strong>Nothing is taken out of
+                                        inventory when the shopper completes their selection. Your server holds the
+                                        seats with an extra call, then confirms.</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
-            </div>
+                    <div class="timeline" data-booking="auto">
+                        <h4>What happens to the seats</h4>
+                        <ol>
+                            <li>The shopper selects their seats in the widget.</li>
+                            <li>Right after the shopper completes their selection, the seats are taken out of inventory
+                                for 15 minutes (<code>booking.expirationMinutes</code>) <span
+                                    class="status">ON_HOLD</span></li>
+                            <li>You charge the shopper and confirm the booking (step 3c) <span
+                                    class="status">CONFIRMED</span></li>
+                            <li class="bad">If it isn&rsquo;t confirmed in time, the seats are released <span
+                                    class="status">EXPIRED</span></li>
+                        </ol>
+                        <p class="foot">Held 15 minutes by default (<code>booking.expirationMinutes</code>, 1&ndash;30).
+                            Exact deadline: <code>booking.utcExpiresAt</code>.</p>
+                    </div>
+                    <div class="timeline" data-booking="manual" hidden>
+                        <h4>What happens to the seats</h4>
+                        <ol>
+                            <li>The shopper selects their seats in the widget.</li>
+                            <li class="bad">The shopper completes their selection. Nothing is taken out of inventory
+                                yet, so others can still buy the seats.</li>
+                            <li>Your server holds the seats (step 3b) <span class="status">ON_HOLD</span></li>
+                            <li>You charge the shopper and confirm the booking (step 3c) <span
+                                    class="status">CONFIRMED</span></li>
+                        </ol>
+                        <p class="foot">Held 15 minutes by default (up to 30). Exact deadline:
+                            <code>booking.utcExpiresAt</code>.</p>
+                    </div>
+                </section>
+
+                <p class="gate-note" id="gate-note">Answer both questions above to see your integration steps.</p>
+
+                <div id="guide" hidden>
+
+                    <section class="row">
+                        <div class="explain">
+                            <p class="eyebrow">Setup</p>
+                            <h2 id="hosts">Environment</h2>
+                            <p>Build and test against sandbox. Switch to production when you go live. Every example on
+                                this page follows your choice.</p>
+                            <label class="env-select" for="env">
+                                <span>Environment</span>
+                                <select id="env">
+                                    <option value="sandbox">Sandbox</option>
+                                    <option value="production">Production</option>
+                                </select>
+                            </label>
+                            <p class="env-warning" data-env="production" hidden>
+                                Production creates real bookings. Use your production token.
+                            </p>
+                        </div>
+                        <div class="example">
+                            <p class="label">Hosts</p>
+                            <pre><code>
+                                API     https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo
+                                Widget  https://<span class="host-widget">widget.sandbox.myticketpro.app</span>
+                            </code></pre>
+                        </div>
+                    </section>
+
+                    <section class="row">
+                        <div class="explain">
+                            <p class="eyebrow">Setup &middot; before you start</p>
+                            <h2 id="auth">Your token</h2>
+                            <p class="ref">Postman: <a
+                                    href="https://www.postman.com/myticketpro/workspace/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea?entity=folder-3fc32757-fb95-4f91-ab2d-decac9761a84">Authentication</a>
+                            </p>
+                            <p>
+                                Every API call needs a token, sent as <code>Authorization: Bearer &lt;token&gt;</code>.
+                                We issue one for
+                                sandbox and one for production. Request them from <code>tech@myticketpro.com</code>.
+                                Keep it on your server and never
+                                put it in browser code.
+                            </p>
+                            <p>Set it once. Every example on this page uses it.</p>
+                        </div>
+                        <div class="example">
+                            <div class="code-tabs">
+                                <div class="tabs" role="tablist">
+                                    <button type="button" role="tab" data-set-lang="curl">cURL</button>
+                                    <button type="button" role="tab" data-set-lang="node">Node.js</button>
+                                    <button type="button" role="tab" data-set-lang="php">PHP</button>
+                                    <button type="button" role="tab" data-set-lang="python">Python</button>
+                                    <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
+                                </div>
+                                <pre data-lang="curl"><code>
+                                    export MTP_TOKEN="<span class="env-token">your-sandbox-token</span>"
+                                </code></pre>
+                                <pre data-lang="node" hidden><code>
+                                    // mtp.js (Node 18+, no packages needed)
+                                    const MTP_API   = "https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo";
+                                    const MTP_TOKEN = process.env.MTP_TOKEN;
+
+                                    export async function mtp(method, path, body) {
+
+                                        const response = await fetch(MTP_API + path, {
+                                            method,
+                                            headers: {
+                                                "Authorization": `Bearer ${MTP_TOKEN}`,
+                                                "Content-Type" : "application/json",
+                                            },
+                                            body: body ? JSON.stringify(body) : undefined,
+                                        });
+
+                                        const data = await response.json();
+
+                                        if (!response.ok) {
+                                            throw new Error(`${data.error}: ${data.errorMessage}`);
+                                        }
+
+                                        return data;
+                                    }
+                                </code></pre>
+                                <pre data-lang="php" hidden><code>
+                                    &lt;?php
+                                    // mtp.php (PHP 8+, ext-curl)
+                                    const MTP_API = "https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo";
+
+                                    function mtp(string $method, string $path, ?array $body = null): array
+                                    {
+                                        $curl = curl_init(MTP_API . $path);
+
+                                        curl_setopt_array($curl, [
+                                            CURLOPT_CUSTOMREQUEST  =&gt; $method,
+                                            CURLOPT_RETURNTRANSFER =&gt; true,
+                                            CURLOPT_HTTPHEADER     =&gt; [
+                                                "Authorization: Bearer " . getenv("MTP_TOKEN"),
+                                                "Content-Type: application/json",
+                                            ],
+                                        ]);
+
+                                        if ($body !== null) {
+                                            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($body));
+                                        }
+
+                                        $data   = json_decode(curl_exec($curl), true);
+                                        $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+                                        if ($status &gt;= 400) {
+                                            throw new RuntimeException("{$data['error']}: {$data['errorMessage']}");
+                                        }
+
+                                        return $data;
+                                    }
+                                </code></pre>
+                                <pre data-lang="python" hidden><code>
+                                    # mtp.py (Python 3.8+, pip install requests)
+                                    import os
+                                    import requests
+
+                                    MTP_API   = "https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo"
+                                    MTP_TOKEN = os.environ["MTP_TOKEN"]
+
+
+                                    def mtp(method, path, body=None):
+
+                                        response = requests.request(
+                                            method,
+                                            MTP_API + path,
+                                            headers={"Authorization": f"Bearer {MTP_TOKEN}"},
+                                            json=body,
+                                        )
+
+                                        data = response.json()
+
+                                        if not response.ok:
+                                            raise RuntimeError(f"{data['error']}: {data['errorMessage']}")
+
+                                        return data
+                                </code></pre>
+                                <pre data-lang="csharp" hidden><code>
+                                    // MtpClient.cs (.NET 6+, no packages needed)
+                                    using System.Net.Http.Json;
+                                    using System.Text.Json.Nodes;
+
+                                    public class MtpClient
+                                    {
+                                        private readonly HttpClient http = new()
+                                        {
+                                            BaseAddress = new Uri("https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/"),
+                                        };
+
+                                        public MtpClient(string token)
+                                        {
+                                            http.DefaultRequestHeaders.Authorization = new("Bearer", token);
+                                        }
+
+                                        public async Task&lt;JsonNode&gt; Send(HttpMethod method, string path, object? body = null)
+                                        {
+                                            using var request = new HttpRequestMessage(method, path);
+
+                                            if (body != null)
+                                            {
+                                                request.Content = JsonContent.Create(body);
+                                            }
+
+                                            using var response = await http.SendAsync(request);
+                                            var data = JsonNode.Parse(await response.Content.ReadAsStringAsync())!;
+
+                                            if (!response.IsSuccessStatusCode)
+                                            {
+                                                throw new HttpRequestException($"{data["error"]}: {data["errorMessage"]}");
+                                            }
+
+                                            return data;
+                                        }
+                                    }
+
+                                    // Program.cs
+                                    builder.Services.AddSingleton(new MtpClient(builder.Configuration["MTP_TOKEN"]!));
+
+                                    // then take it in your controller's constructor; the examples call it `mtp`
+                                    // public CheckoutController(MtpClient mtp) { this.mtp = mtp; }
+                                </code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="row">
+                        <div class="explain">
+                            <p class="eyebrow">Step 1a &middot; server</p>
+                            <h2 id="product">Find the <code>productId</code></h2>
+                            <p class="endpoint"><span class="method get">GET</span>/octo/products</p>
+                            <p class="ref">Postman: <a
+                                    href="https://www.postman.com/myticketpro/workspace/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea?entity=request-ef2741bd-e5aa-4f6f-94e7-dd4bce3e37b4">List
+                                    Products</a></p>
+                            <p>
+                                Each product in the response has an <code>id</code>, like <code>"product-123"</code>.
+                                That is your
+                                <code>productId</code>. Look it up once and save it. It does not change.
+                            </p>
+                        </div>
+                        <div class="example">
+                            <div class="code-tabs">
+                                <div class="tabs" role="tablist">
+                                    <button type="button" role="tab" data-set-lang="curl">cURL</button>
+                                    <button type="button" role="tab" data-set-lang="node">Node.js</button>
+                                    <button type="button" role="tab" data-set-lang="php">PHP</button>
+                                    <button type="button" role="tab" data-set-lang="python">Python</button>
+                                    <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
+                                </div>
+                                <pre data-lang="curl"><code>
+                                    curl https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/products \
+                                         -H "Authorization: Bearer $MTP_TOKEN"
+                                </code></pre>
+                                <pre data-lang="node" hidden><code>
+                                    const products  = await mtp("GET", "/products");
+                                    const productId = products[0].id; // pick yours by name, then save it
+                                </code></pre>
+                                <pre data-lang="php" hidden><code>
+                                    $products  = mtp("GET", "/products");
+                                    $productId = $products[0]["id"]; // pick yours by name, then save it
+                                </code></pre>
+                                <pre data-lang="python" hidden><code>
+                                    products   = mtp("GET", "/products")
+                                    product_id = products[0]["id"]  # pick yours by name, then save it
+                                </code></pre>
+                                <pre data-lang="csharp" hidden><code>
+                                    var products  = await mtp.Send(HttpMethod.Get, "products");
+                                    var productId = (string)products[0]!["id"]!; // pick yours by name, then save it
+                                </code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="row">
+                        <div class="explain">
+                            <p class="eyebrow">Step 1b &middot; server</p>
+                            <h2 id="availability">Find the <code>availabilityId</code></h2>
+                            <p class="endpoint"><span class="method post">POST</span>/octo/availability</p>
+                            <p class="ref">Postman: <a
+                                    href="https://www.postman.com/myticketpro/workspace/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea?entity=request-eaffb715-8f70-495f-8292-449c07e6c633">Availability
+                                    Check</a></p>
+                            <p>
+                                You get one entry per event date. Pick the date the shopper wants, from those with
+                                <code>"available": true</code>.
+                                Its <code>id</code>, like <code>"event-456"</code>, is your <code>availabilityId</code>.
+                            </p>
+                        </div>
+                        <div class="example">
+                            <div class="code-tabs">
+                                <div class="tabs" role="tablist">
+                                    <button type="button" role="tab" data-set-lang="curl">cURL</button>
+                                    <button type="button" role="tab" data-set-lang="node">Node.js</button>
+                                    <button type="button" role="tab" data-set-lang="php">PHP</button>
+                                    <button type="button" role="tab" data-set-lang="python">Python</button>
+                                    <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
+                                </div>
+                                <pre data-lang="curl"><code>
+                                    curl -X POST https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/availability \
+                                         -H "Authorization: Bearer $MTP_TOKEN" \
+                                         -H "Content-Type: application/json" \
+                                         -d '{
+                                             "productId": "product-123",
+                                             "optionId": "widget",
+                                             "localDateStart": "2026-11-01",
+                                             "localDateEnd": "2026-11-30"
+                                         }'
+                                </code></pre>
+                                <pre data-lang="node" hidden><code>
+                                    const dates = await mtp("POST", "/availability", {
+                                        productId,
+                                        optionId       : "widget",
+                                        localDateStart : "2026-11-01",
+                                        localDateEnd   : "2026-11-30",
+                                    });
+
+                                    // pick the date the shopper wants, among the available ones
+                                    const availabilityId = dates.find(date =&gt; date.available).id;
+                                </code></pre>
+                                <pre data-lang="php" hidden><code>
+                                    $dates = mtp("POST", "/availability", [
+                                        "productId"      =&gt; $productId,
+                                        "optionId"       =&gt; "widget",
+                                        "localDateStart" =&gt; "2026-11-01",
+                                        "localDateEnd"   =&gt; "2026-11-30",
+                                    ]);
+
+                                    // pick the date the shopper wants, among the available ones
+                                    $available      = array_values(array_filter($dates, fn ($date) =&gt; $date["available"]));
+                                    $availabilityId = $available[0]["id"];
+                                </code></pre>
+                                <pre data-lang="python" hidden><code>
+                                    dates = mtp("POST", "/availability", {
+                                        "productId":      product_id,
+                                        "optionId":       "widget",
+                                        "localDateStart": "2026-11-01",
+                                        "localDateEnd":   "2026-11-30",
+                                    })
+
+                                    # pick the date the shopper wants, among the available ones
+                                    availability_id = next(date["id"] for date in dates if date["available"])
+                                </code></pre>
+                                <pre data-lang="csharp" hidden><code>
+                                    var dates = await mtp.Send(HttpMethod.Post, "availability", new
+                                    {
+                                        productId,
+                                        optionId       = "widget",
+                                        localDateStart = "2026-11-01",
+                                        localDateEnd   = "2026-11-30",
+                                    });
+
+                                    // pick the date the shopper wants, among the available ones
+                                    var availabilityId = (string)dates.AsArray().First(date =&gt; (bool)date!["available"]!)!["id"]!;
+                                </code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="row">
+                        <div class="explain">
+                            <p class="eyebrow">Step 1c &middot; server</p>
+                            <h2 id="create">Create the widget</h2>
+                            <p class="endpoint"><span class="method post">POST</span>/octo/widgets</p>
+                            <p class="ref">Postman: <a
+                                    href="https://www.postman.com/myticketpro/myticketpro-developers/request/dlmrbmq/create-widget">Create
+                                    Widget</a></p>
+                            <p>Save the <code>uuid</code> with your order. You need the <code>url</code> in step 2.</p>
+                            <div class="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Required</th>
+                                            <th>What to send</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>Authorization</code> header</td>
+                                            <td>Yes</td>
+                                            <td><code>Bearer &lt;token&gt;</code>. See "Before you start".</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>Content-Type</code> header</td>
+                                            <td>Yes</td>
+                                            <td><code>application/json</code></td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>productId</code></td>
+                                            <td>Yes</td>
+                                            <td>From step 1a.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>optionId</code></td>
+                                            <td>Yes</td>
+                                            <td>Always the text <code>"widget"</code>.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>availabilityId</code></td>
+                                            <td>Yes</td>
+                                            <td>From step 1b.</td>
+                                        </tr>
+                                        <tr data-mode="postmessage">
+                                            <td><code>returnUrl</code></td>
+                                            <td>No</td>
+                                            <td><code>null</code> for this flow.</td>
+                                        </tr>
+                                        <tr data-mode="redirect" hidden>
+                                            <td><code>returnUrl</code></td>
+                                            <td>Yes</td>
+                                            <td>The page on your site that the shopper returns to. It must start with
+                                                <code>https://</code>. We add <code>?widgetUuid=</code> to it.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>createBooking</code></td>
+                                            <td>No</td>
+                                            <td>Default <code>true</code>. Set by "Should we automatically hold the
+                                                seats for you?" above.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>booking.expirationMinutes</code></td>
+                                            <td>No</td>
+                                            <td>How long those seats are held after the shopper finishes. Default 15,
+                                                max 30.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>booking.uuid</code></td>
+                                            <td>No</td>
+                                            <td>Your own uuid for the booking. Default: the widget <code>uuid</code>.
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>booking.notes</code></td>
+                                            <td>No</td>
+                                            <td>Free text saved on the booking.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>expirationMinutes</code></td>
+                                            <td>No</td>
+                                            <td>How long the widget link works. Default 1440 (24 hours), max 10080 (7
+                                                days).</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>unitItems</code></td>
+                                            <td>No</td>
+                                            <td>Pre-selected tickets, like
+                                                <code>[{"unitId": "price_type-adult"}]</code>, one entry per ticket.
+                                                Leave it out to let the shopper choose.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>unitItemsEditable</code></td>
+                                            <td>No</td>
+                                            <td>Default <code>true</code>. <code>false</code> locks the pre-selected
+                                                tickets.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>uuid</code></td>
+                                            <td>No</td>
+                                            <td>Your own uuid for the widget. Default: we create one.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>currency</code></td>
+                                            <td>No</td>
+                                            <td>Only <code>"USD"</code>.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                        <div class="example">
+                            <div class="code-tabs">
+                                <div class="tabs" role="tablist">
+                                    <button type="button" role="tab" data-set-lang="curl">cURL</button>
+                                    <button type="button" role="tab" data-set-lang="node">Node.js</button>
+                                    <button type="button" role="tab" data-set-lang="php">PHP</button>
+                                    <button type="button" role="tab" data-set-lang="python">Python</button>
+                                    <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
+                                </div>
+                                <pre data-lang="curl"><code>
+                                    curl -X POST https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/widgets \
+                                         -H "Authorization: Bearer $MTP_TOKEN" \
+                                         -H "Content-Type: application/json" \
+                                         -d '{
+                                             "productId": "product-123",
+                                             "optionId": "widget",
+                                             "availabilityId": "event-456",
+                                    <span data-booking="manual" hidden>         "createBooking": false,
+                                    </span>         "returnUrl": <span class="return-url" data-null="null">null</span>
+                                         }'
+                                </code></pre>
+                                <pre data-lang="node" hidden><code>
+                                    const widget = await mtp("POST", "/widgets", {
+                                        productId,
+                                        optionId  : "widget",
+                                        availabilityId,
+                                    <span data-booking="manual" hidden>    createBooking : false,
+                                    </span>    returnUrl : <span class="return-url" data-null="null">null</span>,
+                                    });
+
+                                    // save widget.uuid against your order, use widget.url in step 2
+                                </code></pre>
+                                <pre data-lang="php" hidden><code>
+                                    $widget = mtp("POST", "/widgets", [
+                                        "productId"      =&gt; $productId,
+                                        "optionId"       =&gt; "widget",
+                                        "availabilityId" =&gt; $availabilityId,
+                                    <span data-booking="manual" hidden>    "createBooking"  =&gt; false,
+                                    </span>    "returnUrl"      =&gt; <span class="return-url" data-null="null">null</span>,
+                                    ]);
+
+                                    // save $widget["uuid"] against your order, use $widget["url"] in step 2
+                                </code></pre>
+                                <pre data-lang="python" hidden><code>
+                                    widget = mtp("POST", "/widgets", {
+                                        "productId":      product_id,
+                                        "optionId":       "widget",
+                                        "availabilityId": availability_id,
+                                    <span data-booking="manual" hidden>    "createBooking":  False,
+                                    </span>    "returnUrl":      <span class="return-url" data-null="None">None</span>,
+                                    })
+
+                                    # save widget["uuid"] against your order, use widget["url"] in step 2
+                                </code></pre>
+                                <pre data-lang="csharp" hidden><code>
+                                    var widget = await mtp.Send(HttpMethod.Post, "widgets", new
+                                    {
+                                        productId,
+                                        optionId  = "widget",
+                                        availabilityId,
+                                    <span data-booking="manual" hidden>    createBooking = false,
+                                    </span>    returnUrl = <span class="return-url" data-null="(string?)null">(string?)null</span>,
+                                    });
+
+                                    // save widget["uuid"] against your order, use widget["url"] in step 2
+                                </code></pre>
+                            </div>
+                            <p class="label">Response (shortened)</p>
+                            <pre><code>
+                                {
+                                    "uuid": "019f46c8-6357-75d8-9a67-f87787566c67",
+                                    "url": "https://<span class="host-widget">widget.sandbox.myticketpro.app</span>/019f46c8-6357-75d8-9a67-f87787566c67",
+                                    "status": "ACTIVE"
+                                }
+                            </code></pre>
+                        </div>
+                    </section>
+
+                    <section class="row" data-mode="postmessage">
+                        <div class="explain">
+                            <p class="eyebrow">Step 2 &middot; browser</p>
+                            <h2 id="embed">Embed it and listen</h2>
+                            <p class="endpoint"><span class="method js">JS</span>window.addEventListener("message")</p>
+                            <p>This runs in your page, in the browser. Put the <code>url</code> from step 1c in both
+                                places.</p>
+                            <ul>
+                                <li><code>change</code>: fires on every selection change, including when the selection
+                                    is cleared. It carries the full current selection and may repeat.</li>
+                                <li><code>complete</code>: fires once, when the shopper finishes. It has the same
+                                    payload as <code>change</code>. Then go to step 3.</li>
+                                <li><code>resize</code>: <code>{uuid, height}</code>. The height is 800 while the
+                                    shopper selects, and stays 800 after completion. If the widget opens already
+                                    expired, canceled or completed, it is the height of that message.</li>
+                                <li>The widget sends only the target height, not the steps in between. To animate the
+                                    change, put <code>transition: height 500ms ease-in-out</code> on the iframe. Start
+                                    it at <code>height: 800px</code>, with <code>scrolling="no"</code> and
+                                    <code>overflow: hidden</code> so no scrollbar flashes while it resizes.</li>
+                                <li>The payload is <code>{uuid, unitItems, pricing}</code>. <code>unitItems</code> has
+                                    one entry per ticket. <code>pricing</code> is in cents and comes from the browser.
+                                    Charge <code>booking.pricing.retail</code>.</li>
+                            </ul>
+                        </div>
+                        <div class="example">
+                            <p class="label">HTML + JavaScript, in your page</p>
+                            <pre><code>
+                                &lt;style&gt;
+                                    #octo-widget {
+                                        width      : 100%;
+                                        height     : 800px;               /* until the first resize message */
+                                        border     : 0;
+                                        overflow   : hidden;
+                                        transition : height 500ms ease-in-out;  /* animates each resize */
+                                    }
+                                &lt;/style&gt;
+
+                                &lt;iframe
+                                    id="octo-widget"
+                                    src="<em>{widget.url}</em>"
+                                    scrolling="no"
+                                &gt;&lt;/iframe&gt;
+
+                                &lt;script&gt;
+                                    const widgetOrigin = new URL("<em>{widget.url}</em>").origin;
+                                    const iframe       = document.getElementById("octo-widget");
+
+                                    window.addEventListener("message", (event) =&gt; {
+                                        if (event.origin !== widgetOrigin) return;
+
+                                        const { type, version, payload } = event.data || {};
+                                        if (version !== "1") return;
+
+                                        if (type === "octo.widget.change")   updateSummary(payload);
+                                        if (type === "octo.widget.complete") onWidgetComplete(payload.uuid);
+                                        if (type === "octo.widget.resize")   iframe.style.height = payload.height + "px";
+                                    });
+                                &lt;/script&gt;
+                            </code></pre>
+                        </div>
+                    </section>
+
+                    <section class="row" data-mode="redirect" hidden>
+                        <div class="explain">
+                            <p class="eyebrow">Step 2 &middot; browser</p>
+                            <h2 id="send">Send the shopper to the widget</h2>
+                            <p class="endpoint"><span class="method js">JS</span>window.location.href = widget.url</p>
+                            <p>
+                                Open it as a full page, not in an iframe. When the shopper finishes, the widget sends
+                                them to
+                                <code>returnUrl?widgetUuid=<em>{uuid}</em></code>. Your existing query string is kept.
+                                Then go to step 3.
+                            </p>
+                        </div>
+                        <div class="example">
+                            <p class="label">JavaScript, in your page</p>
+                            <pre><code>
+                                window.location.href = "<em>{widget.url}</em>";
+                            </code></pre>
+                        </div>
+                    </section>
+
+                    <section class="row">
+                        <div class="explain">
+                            <p class="eyebrow">Step 3a &middot; server</p>
+                            <h2 id="result">Read the result</h2>
+                            <p class="endpoint"><span class="method get">GET</span>/octo/widgets/{uuid}</p>
+                            <p class="ref">Postman: <a
+                                    href="https://www.postman.com/myticketpro/myticketpro-developers/request/w3okkxd/get-widgets">Get
+                                    Widget</a></p>
+                            <p>The widget is now <code>COMPLETED</code> and single use.</p>
+                            <p data-booking="auto">
+                                The <code>booking</code> is already held for <code>booking.expirationMinutes</code>
+                                (default 15, max 30)
+                                from completion. Go to 3c.
+                            </p>
+                            <p data-booking="manual" hidden>Nothing is held yet. Go to 3b.</p>
+                        </div>
+                        <div class="example">
+                            <div class="code-tabs">
+                                <div class="tabs" role="tablist">
+                                    <button type="button" role="tab" data-set-lang="curl">cURL</button>
+                                    <button type="button" role="tab" data-set-lang="node">Node.js</button>
+                                    <button type="button" role="tab" data-set-lang="php">PHP</button>
+                                    <button type="button" role="tab" data-set-lang="python">Python</button>
+                                    <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
+                                </div>
+                                <pre data-lang="curl"><code>
+                                    curl https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/widgets/019f46c8-6357-75d8-9a67-f87787566c67 \
+                                         -H "Authorization: Bearer $MTP_TOKEN"
+                                </code></pre>
+                                <pre data-lang="node" hidden><code>
+                                    const result = await mtp("GET", `/widgets/${widgetUuid}`);
+                                    // result.status === "COMPLETED"
+                                </code></pre>
+                                <pre data-lang="php" hidden><code>
+                                    $result = mtp("GET", "/widgets/{$widgetUuid}");
+                                    // $result["status"] === "COMPLETED"
+                                </code></pre>
+                                <pre data-lang="python" hidden><code>
+                                    result = mtp("GET", f"/widgets/{widget_uuid}")
+                                    # result["status"] == "COMPLETED"
+                                </code></pre>
+                                <pre data-lang="csharp" hidden><code>
+                                    var result = await mtp.Send(HttpMethod.Get, $"widgets/{widgetUuid}");
+                                    // (string)result["status"] == "COMPLETED"
+                                </code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="row" data-booking="manual" hidden>
+                        <div class="explain">
+                            <p class="eyebrow">Step 3b &middot; server</p>
+                            <h2 id="book">Hold the seats</h2>
+                            <p class="endpoint"><span class="method post">POST</span>/octo/bookings</p>
+                            <p class="ref">Postman: <a
+                                    href="https://www.postman.com/myticketpro/workspace/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea?entity=request-71ff36ae-cd23-431d-b769-5c99d45cf791">Booking
+                                    Reservation</a></p>
+                            <p>
+                                This creates the booking, on hold, with exactly what the shopper picked. Pass the
+                                <code>widgetUuid</code>.
+                            </p>
+                        </div>
+                        <div class="example">
+                            <div class="code-tabs">
+                                <div class="tabs" role="tablist">
+                                    <button type="button" role="tab" data-set-lang="curl">cURL</button>
+                                    <button type="button" role="tab" data-set-lang="node">Node.js</button>
+                                    <button type="button" role="tab" data-set-lang="php">PHP</button>
+                                    <button type="button" role="tab" data-set-lang="python">Python</button>
+                                    <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
+                                </div>
+                                <pre data-lang="curl"><code>
+                                    curl -X POST https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/bookings \
+                                         -H "Authorization: Bearer $MTP_TOKEN" \
+                                         -H "Content-Type: application/json" \
+                                         -d '{
+                                             "productId": "product-123",
+                                             "optionId": "widget",
+                                             "availabilityId": "event-456",
+                                             "widgetUuid": "019f46c8-6357-75d8-9a67-f87787566c67"
+                                         }'
+                                </code></pre>
+                                <pre data-lang="node" hidden><code>
+                                    const booking = await mtp("POST", "/bookings", {
+                                        productId,
+                                        optionId   : "widget",
+                                        availabilityId,
+                                        widgetUuid,
+                                    });
+                                </code></pre>
+                                <pre data-lang="php" hidden><code>
+                                    $booking = mtp("POST", "/bookings", [
+                                        "productId"      =&gt; $productId,
+                                        "optionId"       =&gt; "widget",
+                                        "availabilityId" =&gt; $availabilityId,
+                                        "widgetUuid"     =&gt; $widgetUuid,
+                                    ]);
+                                </code></pre>
+                                <pre data-lang="python" hidden><code>
+                                    booking = mtp("POST", "/bookings", {
+                                        "productId":      product_id,
+                                        "optionId":       "widget",
+                                        "availabilityId": availability_id,
+                                        "widgetUuid":     widget_uuid,
+                                    })
+                                </code></pre>
+                                <pre data-lang="csharp" hidden><code>
+                                    var booking = await mtp.Send(HttpMethod.Post, "bookings", new
+                                    {
+                                        productId,
+                                        optionId = "widget",
+                                        availabilityId,
+                                        widgetUuid,
+                                    });
+                                </code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="row">
+                        <div class="explain">
+                            <p class="eyebrow">Step 3c &middot; server</p>
+                            <h2 id="confirm">Confirm, after payment</h2>
+                            <p class="endpoint"><span class="method post">POST</span>/octo/bookings/{uuid}/confirm</p>
+                            <p class="ref">Postman: <a
+                                    href="https://www.postman.com/myticketpro/workspace/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea?entity=request-d8ad17fa-0a9e-46d4-a527-845618dfabbd">Booking
+                                    Confirmation</a></p>
+                            <p>
+                                Confirm before the hold expires. Charge <code>booking.pricing.retail</code>. All four
+                                <code>contact</code>
+                                fields are required. The tickets are emailed to <code>emailAddress</code>.
+                            </p>
+                        </div>
+                        <div class="example">
+                            <div class="code-tabs">
+                                <div class="tabs" role="tablist">
+                                    <button type="button" role="tab" data-set-lang="curl">cURL</button>
+                                    <button type="button" role="tab" data-set-lang="node">Node.js</button>
+                                    <button type="button" role="tab" data-set-lang="php">PHP</button>
+                                    <button type="button" role="tab" data-set-lang="python">Python</button>
+                                    <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
+                                </div>
+                                <pre data-lang="curl"><code>
+                                    curl -X POST https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/bookings/019f46c8-6357-75d8-9a67-f87787566c67/confirm \
+                                         -H "Authorization: Bearer $MTP_TOKEN" \
+                                         -H "Content-Type: application/json" \
+                                         -d '{
+                                             "resellerReference": "ORDER-1001",
+                                             "contact": {
+                                                 "firstName": "John",
+                                                 "lastName": "Smith",
+                                                 "emailAddress": "john.smith@example.com",
+                                                 "phoneNumber": "+15551234567"
+                                             }
+                                         }'
+                                </code></pre>
+                                <pre data-lang="node" hidden><code>
+                                    const bookingUuid = result.booking?.uuid ?? booking.uuid;
+
+                                    await mtp("POST", `/bookings/${bookingUuid}/confirm`, {
+                                        resellerReference : "ORDER-1001",
+                                        contact           : {
+                                            firstName    : "John",
+                                            lastName     : "Smith",
+                                            emailAddress : "john.smith@example.com",
+                                            phoneNumber  : "+15551234567",
+                                        },
+                                    });
+                                </code></pre>
+                                <pre data-lang="php" hidden><code>
+                                    $bookingUuid = $result["booking"]["uuid"] ?? $booking["uuid"];
+
+                                    mtp("POST", "/bookings/{$bookingUuid}/confirm", [
+                                        "resellerReference" =&gt; "ORDER-1001",
+                                        "contact"           =&gt; [
+                                            "firstName"    =&gt; "John",
+                                            "lastName"     =&gt; "Smith",
+                                            "emailAddress" =&gt; "john.smith@example.com",
+                                            "phoneNumber"  =&gt; "+15551234567",
+                                        ],
+                                    ]);
+                                </code></pre>
+                                <pre data-lang="python" hidden><code>
+                                    booking_uuid = (result.get("booking") or booking)["uuid"]
+
+                                    mtp("POST", f"/bookings/{booking_uuid}/confirm", {
+                                        "resellerReference": "ORDER-1001",
+                                        "contact": {
+                                            "firstName":    "John",
+                                            "lastName":     "Smith",
+                                            "emailAddress": "john.smith@example.com",
+                                            "phoneNumber":  "+15551234567",
+                                        },
+                                    })
+                                </code></pre>
+                                <pre data-lang="csharp" hidden><code>
+                                    var bookingUuid = (string?)result["booking"]?["uuid"] ?? (string)booking["uuid"]!;
+
+                                    await mtp.Send(HttpMethod.Post, $"bookings/{bookingUuid}/confirm", new
+                                    {
+                                        resellerReference = "ORDER-1001",
+                                        contact = new
+                                        {
+                                            firstName    = "John",
+                                            lastName     = "Smith",
+                                            emailAddress = "john.smith@example.com",
+                                            phoneNumber  = "+15551234567",
+                                        },
+                                    });
+                                </code></pre>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="try">
+                        <p class="eyebrow">Test</p>
+                        <h2 id="try">Try it</h2>
+
+                        <p>Run the example project with your sandbox token. It lists products, creates the widget from
+                            your server and confirms the booking. To watch a single widget, paste its uuid from
+                            <code>POST /octo/widgets</code> into a demo.</p>
+
+                        <div class="cards">
+                            <a href="https://github.com/MyTicketPro/integration/blob/main/nodejs/README.md">
+                                <strong>Example project</strong>
+                                <span>Node.js, the iframe flow from start to finish. Needs a sandbox token.</span>
+                            </a>
+                            <a href="postmessage/index.html" data-mode="postmessage">
+                                <strong>Iframe demo</strong>
+                                <span>Paste a widget uuid. It embeds the widget and logs every message as it
+                                    arrives.</span>
+                            </a>
+                            <a href="redirect/index.html" data-mode="redirect" hidden>
+                                <strong>Redirect demo</strong>
+                                <span>Paste the uuid of a widget whose <code>returnUrl</code> is the demo's return page.
+                                    It opens the widget as a full page, then brings you back.</span>
+                            </a>
+                        </div>
+
+                        <p class="ref">Full reference: <a
+                                href="https://www.postman.com/myticketpro/myticketpro-developers">Postman</a>, Widget
+                            Life Cycle Guide.</p>
+                    </section>
+                </div>
+
+            </main>
         </div>
-        <div class="timeline" data-booking="auto">
-                <h4>What happens to the seats</h4>
-                <ol>
-                    <li>The shopper selects their seats in the widget.</li>
-                    <li>Right after the shopper completes their selection, the seats are taken out of inventory for 15 minutes (<code>booking.expirationMinutes</code>) <span class="status">ON_HOLD</span></li>
-                    <li>You charge the shopper and confirm the booking (step 3c) <span class="status">CONFIRMED</span></li>
-                    <li class="bad">If it isn&rsquo;t confirmed in time, the seats are released <span class="status">EXPIRED</span></li>
-                </ol>
-                <p class="foot">Held 15 minutes by default (<code>booking.expirationMinutes</code>, 1&ndash;30). Exact deadline: <code>booking.utcExpiresAt</code>.</p>
-            </div>
-            <div class="timeline" data-booking="manual" hidden>
-                <h4>What happens to the seats</h4>
-                <ol>
-                    <li>The shopper selects their seats in the widget.</li>
-                    <li class="bad">The shopper completes their selection. Nothing is taken out of inventory yet, so others can still buy the seats.</li>
-                    <li>Your server holds the seats (step 3b) <span class="status">ON_HOLD</span></li>
-                    <li>You charge the shopper and confirm the booking (step 3c) <span class="status">CONFIRMED</span></li>
-                </ol>
-                <p class="foot">Held 15 minutes by default (up to 30). Exact deadline: <code>booking.utcExpiresAt</code>.</p>
-            </div>
-    </section>
-
-    <p class="gate-note" id="gate-note">Answer both questions above to see your integration steps.</p>
-
-    <div id="guide" hidden>
-
-    <section class="row">
-        <div class="explain">
-            <p class="eyebrow">Setup</p>
-            <h2 id="hosts">Environment</h2>
-            <p>Build and test against sandbox. Switch to production when you go live. Every example on this page follows your choice.</p>
-            <label class="env-select" for="env">
-                <span>Environment</span>
-                <select id="env">
-                    <option value="sandbox">Sandbox</option>
-                    <option value="production">Production</option>
-                </select>
-            </label>
-            <p class="env-warning" data-env="production" hidden>
-                Production creates real bookings. Use your production token.
-            </p>
-        </div>
-        <div class="example">
-            <p class="label">Hosts</p>
-<pre><code>API     https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo
-Widget  https://<span class="host-widget">widget.sandbox.myticketpro.app</span></code></pre>
-        </div>
-    </section>
-
-    <section class="row">
-        <div class="explain">
-            <p class="eyebrow">Setup &middot; before you start</p>
-            <h2 id="auth">Your token</h2>
-            <p class="ref">Postman: <a href="https://www.postman.com/myticketpro/workspace/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea?entity=folder-3fc32757-fb95-4f91-ab2d-decac9761a84">Authentication</a></p>
-            <p>
-                Every API call needs a token, sent as <code>Authorization: Bearer &lt;token&gt;</code>. We issue one for
-                sandbox and one for production. Request them from <code>tech@myticketpro.com</code>. Keep it on your server and never
-                put it in browser code.
-            </p>
-            <p>Set it once. Every example on this page uses it.</p>
-        </div>
-        <div class="example">
-<div class="code-tabs">
-    <div class="tabs" role="tablist">
-        <button type="button" role="tab" data-set-lang="curl">cURL</button>
-        <button type="button" role="tab" data-set-lang="node">Node.js</button>
-        <button type="button" role="tab" data-set-lang="php">PHP</button>
-        <button type="button" role="tab" data-set-lang="python">Python</button>
-        <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
-    </div>
-<pre data-lang="curl"><code>export MTP_TOKEN="<span class="env-token">your-sandbox-token</span>"</code></pre>
-<pre data-lang="node" hidden><code>// mtp.js (Node 18+, no packages needed)
-const MTP_API   = "https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo";
-const MTP_TOKEN = process.env.MTP_TOKEN;
-
-export async function mtp(method, path, body) {
-
-    const response = await fetch(MTP_API + path, {
-        method,
-        headers: {
-            "Authorization": `Bearer ${MTP_TOKEN}`,
-            "Content-Type" : "application/json",
-        },
-        body: body ? JSON.stringify(body) : undefined,
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(`${data.error}: ${data.errorMessage}`);
-    }
-
-    return data;
-}</code></pre>
-<pre data-lang="php" hidden><code>&lt;?php
-// mtp.php (PHP 8+, ext-curl)
-const MTP_API = "https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo";
-
-function mtp(string $method, string $path, ?array $body = null): array
-{
-    $curl = curl_init(MTP_API . $path);
-
-    curl_setopt_array($curl, [
-        CURLOPT_CUSTOMREQUEST  =&gt; $method,
-        CURLOPT_RETURNTRANSFER =&gt; true,
-        CURLOPT_HTTPHEADER     =&gt; [
-            "Authorization: Bearer " . getenv("MTP_TOKEN"),
-            "Content-Type: application/json",
-        ],
-    ]);
-
-    if ($body !== null) {
-        curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($body));
-    }
-
-    $data   = json_decode(curl_exec($curl), true);
-    $status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-    if ($status &gt;= 400) {
-        throw new RuntimeException("{$data['error']}: {$data['errorMessage']}");
-    }
-
-    return $data;
-}</code></pre>
-<pre data-lang="python" hidden><code># mtp.py (Python 3.8+, pip install requests)
-import os
-import requests
-
-MTP_API   = "https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo"
-MTP_TOKEN = os.environ["MTP_TOKEN"]
-
-
-def mtp(method, path, body=None):
-
-    response = requests.request(
-        method,
-        MTP_API + path,
-        headers={"Authorization": f"Bearer {MTP_TOKEN}"},
-        json=body,
-    )
-
-    data = response.json()
-
-    if not response.ok:
-        raise RuntimeError(f"{data['error']}: {data['errorMessage']}")
-
-    return data</code></pre>
-<pre data-lang="csharp" hidden><code>// MtpClient.cs (.NET 6+, no packages needed)
-using System.Net.Http.Json;
-using System.Text.Json.Nodes;
-
-public class MtpClient
-{
-    private readonly HttpClient http = new()
-    {
-        BaseAddress = new Uri("https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/"),
-    };
-
-    public MtpClient(string token)
-    {
-        http.DefaultRequestHeaders.Authorization = new("Bearer", token);
-    }
-
-    public async Task&lt;JsonNode&gt; Send(HttpMethod method, string path, object? body = null)
-    {
-        using var request = new HttpRequestMessage(method, path);
-
-        if (body != null)
-        {
-            request.Content = JsonContent.Create(body);
-        }
-
-        using var response = await http.SendAsync(request);
-        var data = JsonNode.Parse(await response.Content.ReadAsStringAsync())!;
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException($"{data["error"]}: {data["errorMessage"]}");
-        }
-
-        return data;
-    }
-}
-
-// Program.cs
-builder.Services.AddSingleton(new MtpClient(builder.Configuration["MTP_TOKEN"]!));
-
-// then take it in your controller's constructor; the examples call it `mtp`
-// public CheckoutController(MtpClient mtp) { this.mtp = mtp; }</code></pre>
-</div>
-        </div>
-    </section>
-
-    <section class="row">
-        <div class="explain">
-            <p class="eyebrow">Step 1a &middot; server</p>
-            <h2 id="product">Find the <code>productId</code></h2>
-            <p class="endpoint"><span class="method get">GET</span>/octo/products</p>
-            <p class="ref">Postman: <a href="https://www.postman.com/myticketpro/workspace/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea?entity=request-ef2741bd-e5aa-4f6f-94e7-dd4bce3e37b4">List Products</a></p>
-            <p>
-                Each product in the response has an <code>id</code>, like <code>"product-123"</code>. That is your
-                <code>productId</code>. Look it up once and save it. It does not change.
-            </p>
-        </div>
-        <div class="example">
-<div class="code-tabs">
-    <div class="tabs" role="tablist">
-        <button type="button" role="tab" data-set-lang="curl">cURL</button>
-        <button type="button" role="tab" data-set-lang="node">Node.js</button>
-        <button type="button" role="tab" data-set-lang="php">PHP</button>
-        <button type="button" role="tab" data-set-lang="python">Python</button>
-        <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
-    </div>
-<pre data-lang="curl"><code>curl https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/products \
-     -H "Authorization: Bearer $MTP_TOKEN"</code></pre>
-<pre data-lang="node" hidden><code>const products  = await mtp("GET", "/products");
-const productId = products[0].id; // pick yours by name, then save it</code></pre>
-<pre data-lang="php" hidden><code>$products  = mtp("GET", "/products");
-$productId = $products[0]["id"]; // pick yours by name, then save it</code></pre>
-<pre data-lang="python" hidden><code>products   = mtp("GET", "/products")
-product_id = products[0]["id"]  # pick yours by name, then save it</code></pre>
-<pre data-lang="csharp" hidden><code>var products  = await mtp.Send(HttpMethod.Get, "products");
-var productId = (string)products[0]!["id"]!; // pick yours by name, then save it</code></pre>
-</div>
-        </div>
-    </section>
-
-    <section class="row">
-        <div class="explain">
-            <p class="eyebrow">Step 1b &middot; server</p>
-            <h2 id="availability">Find the <code>availabilityId</code></h2>
-            <p class="endpoint"><span class="method post">POST</span>/octo/availability</p>
-            <p class="ref">Postman: <a href="https://www.postman.com/myticketpro/workspace/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea?entity=request-eaffb715-8f70-495f-8292-449c07e6c633">Availability Check</a></p>
-            <p>
-                You get one entry per event date. Pick the date the shopper wants, from those with <code>"available": true</code>.
-                Its <code>id</code>, like <code>"event-456"</code>, is your <code>availabilityId</code>.
-            </p>
-        </div>
-        <div class="example">
-<div class="code-tabs">
-    <div class="tabs" role="tablist">
-        <button type="button" role="tab" data-set-lang="curl">cURL</button>
-        <button type="button" role="tab" data-set-lang="node">Node.js</button>
-        <button type="button" role="tab" data-set-lang="php">PHP</button>
-        <button type="button" role="tab" data-set-lang="python">Python</button>
-        <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
-    </div>
-<pre data-lang="curl"><code>curl -X POST https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/availability \
-     -H "Authorization: Bearer $MTP_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{
-         "productId": "product-123",
-         "optionId": "widget",
-         "localDateStart": "2026-11-01",
-         "localDateEnd": "2026-11-30"
-     }'</code></pre>
-<pre data-lang="node" hidden><code>const dates = await mtp("POST", "/availability", {
-    productId,
-    optionId       : "widget",
-    localDateStart : "2026-11-01",
-    localDateEnd   : "2026-11-30",
-});
-
-// pick the date the shopper wants, among the available ones
-const availabilityId = dates.find(date =&gt; date.available).id;</code></pre>
-<pre data-lang="php" hidden><code>$dates = mtp("POST", "/availability", [
-    "productId"      =&gt; $productId,
-    "optionId"       =&gt; "widget",
-    "localDateStart" =&gt; "2026-11-01",
-    "localDateEnd"   =&gt; "2026-11-30",
-]);
-
-// pick the date the shopper wants, among the available ones
-$available      = array_values(array_filter($dates, fn ($date) =&gt; $date["available"]));
-$availabilityId = $available[0]["id"];</code></pre>
-<pre data-lang="python" hidden><code>dates = mtp("POST", "/availability", {
-    "productId":      product_id,
-    "optionId":       "widget",
-    "localDateStart": "2026-11-01",
-    "localDateEnd":   "2026-11-30",
-})
-
-# pick the date the shopper wants, among the available ones
-availability_id = next(date["id"] for date in dates if date["available"])</code></pre>
-<pre data-lang="csharp" hidden><code>var dates = await mtp.Send(HttpMethod.Post, "availability", new
-{
-    productId,
-    optionId       = "widget",
-    localDateStart = "2026-11-01",
-    localDateEnd   = "2026-11-30",
-});
-
-// pick the date the shopper wants, among the available ones
-var availabilityId = (string)dates.AsArray().First(date =&gt; (bool)date!["available"]!)!["id"]!;</code></pre>
-</div>
-        </div>
-    </section>
-
-    <section class="row">
-        <div class="explain">
-            <p class="eyebrow">Step 1c &middot; server</p>
-            <h2 id="create">Create the widget</h2>
-            <p class="endpoint"><span class="method post">POST</span>/octo/widgets</p>
-            <p class="ref">Postman: <a href="https://www.postman.com/myticketpro/myticketpro-developers/request/dlmrbmq/create-widget">Create Widget</a></p>
-            <p>Save the <code>uuid</code> with your order. You need the <code>url</code> in step 2.</p>
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>Parameter</th>
-                    <th>Required</th>
-                    <th>What to send</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><code>Authorization</code> header</td>
-                    <td>Yes</td>
-                    <td><code>Bearer &lt;token&gt;</code>. See "Before you start".</td>
-                </tr>
-                <tr>
-                    <td><code>Content-Type</code> header</td>
-                    <td>Yes</td>
-                    <td><code>application/json</code></td>
-                </tr>
-                <tr>
-                    <td><code>productId</code></td>
-                    <td>Yes</td>
-                    <td>From step 1a.</td>
-                </tr>
-                <tr>
-                    <td><code>optionId</code></td>
-                    <td>Yes</td>
-                    <td>Always the text <code>"widget"</code>.</td>
-                </tr>
-                <tr>
-                    <td><code>availabilityId</code></td>
-                    <td>Yes</td>
-                    <td>From step 1b.</td>
-                </tr>
-                <tr data-mode="postmessage">
-                    <td><code>returnUrl</code></td>
-                    <td>No</td>
-                    <td><code>null</code> for this flow.</td>
-                </tr>
-                <tr data-mode="redirect" hidden>
-                    <td><code>returnUrl</code></td>
-                    <td>Yes</td>
-                    <td>The page on your site that the shopper returns to. It must start with <code>https://</code>. We add <code>?widgetUuid=</code> to it.</td>
-                </tr>
-                <tr>
-                    <td><code>createBooking</code></td>
-                    <td>No</td>
-                    <td>Default <code>true</code>. Set by "Should we automatically hold the seats for you?" above.</td>
-                </tr>
-                <tr>
-                    <td><code>booking.expirationMinutes</code></td>
-                    <td>No</td>
-                    <td>How long those seats are held after the shopper finishes. Default 15, max 30.</td>
-                </tr>
-                <tr>
-                    <td><code>booking.uuid</code></td>
-                    <td>No</td>
-                    <td>Your own uuid for the booking. Default: the widget <code>uuid</code>.</td>
-                </tr>
-                <tr>
-                    <td><code>booking.notes</code></td>
-                    <td>No</td>
-                    <td>Free text saved on the booking.</td>
-                </tr>
-                <tr>
-                    <td><code>expirationMinutes</code></td>
-                    <td>No</td>
-                    <td>How long the widget link works. Default 1440 (24 hours), max 10080 (7 days).</td>
-                </tr>
-                <tr>
-                    <td><code>unitItems</code></td>
-                    <td>No</td>
-                    <td>Pre-selected tickets, like <code>[{"unitId": "price_type-adult"}]</code>, one entry per ticket. Leave it out to let the shopper choose.</td>
-                </tr>
-                <tr>
-                    <td><code>unitItemsEditable</code></td>
-                    <td>No</td>
-                    <td>Default <code>true</code>. <code>false</code> locks the pre-selected tickets.</td>
-                </tr>
-                <tr>
-                    <td><code>uuid</code></td>
-                    <td>No</td>
-                    <td>Your own uuid for the widget. Default: we create one.</td>
-                </tr>
-                <tr>
-                    <td><code>currency</code></td>
-                    <td>No</td>
-                    <td>Only <code>"USD"</code>.</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-        </div>
-        <div class="example">
-<div class="code-tabs">
-    <div class="tabs" role="tablist">
-        <button type="button" role="tab" data-set-lang="curl">cURL</button>
-        <button type="button" role="tab" data-set-lang="node">Node.js</button>
-        <button type="button" role="tab" data-set-lang="php">PHP</button>
-        <button type="button" role="tab" data-set-lang="python">Python</button>
-        <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
-    </div>
-<pre data-lang="curl"><code>curl -X POST https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/widgets \
-     -H "Authorization: Bearer $MTP_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{
-         "productId": "product-123",
-         "optionId": "widget",
-         "availabilityId": "event-456",
-<span data-booking="manual" hidden>         "createBooking": false,
-</span>         "returnUrl": <span class="return-url" data-null="null">null</span>
-     }'</code></pre>
-<pre data-lang="node" hidden><code>const widget = await mtp("POST", "/widgets", {
-    productId,
-    optionId  : "widget",
-    availabilityId,
-<span data-booking="manual" hidden>    createBooking : false,
-</span>    returnUrl : <span class="return-url" data-null="null">null</span>,
-});
-
-// save widget.uuid against your order, use widget.url in step 2</code></pre>
-<pre data-lang="php" hidden><code>$widget = mtp("POST", "/widgets", [
-    "productId"      =&gt; $productId,
-    "optionId"       =&gt; "widget",
-    "availabilityId" =&gt; $availabilityId,
-<span data-booking="manual" hidden>    "createBooking"  =&gt; false,
-</span>    "returnUrl"      =&gt; <span class="return-url" data-null="null">null</span>,
-]);
-
-// save $widget["uuid"] against your order, use $widget["url"] in step 2</code></pre>
-<pre data-lang="python" hidden><code>widget = mtp("POST", "/widgets", {
-    "productId":      product_id,
-    "optionId":       "widget",
-    "availabilityId": availability_id,
-<span data-booking="manual" hidden>    "createBooking":  False,
-</span>    "returnUrl":      <span class="return-url" data-null="None">None</span>,
-})
-
-# save widget["uuid"] against your order, use widget["url"] in step 2</code></pre>
-<pre data-lang="csharp" hidden><code>var widget = await mtp.Send(HttpMethod.Post, "widgets", new
-{
-    productId,
-    optionId  = "widget",
-    availabilityId,
-<span data-booking="manual" hidden>    createBooking = false,
-</span>    returnUrl = <span class="return-url" data-null="(string?)null">(string?)null</span>,
-});
-
-// save widget["uuid"] against your order, use widget["url"] in step 2</code></pre>
-</div>
-            <p class="label">Response (shortened)</p>
-<pre><code>{
-    "uuid": "019f46c8-6357-75d8-9a67-f87787566c67",
-    "url": "https://<span class="host-widget">widget.sandbox.myticketpro.app</span>/019f46c8-6357-75d8-9a67-f87787566c67",
-    "status": "ACTIVE"
-}</code></pre>
-        </div>
-    </section>
-
-    <section class="row" data-mode="postmessage">
-        <div class="explain">
-            <p class="eyebrow">Step 2 &middot; browser</p>
-            <h2 id="embed">Embed it and listen</h2>
-            <p class="endpoint"><span class="method js">JS</span>window.addEventListener("message")</p>
-            <p>This runs in your page, in the browser. Put the <code>url</code> from step 1c in both places.</p>
-            <ul>
-                <li><code>change</code>: fires on every selection change, including when the selection is cleared. It carries the full current selection and may repeat.</li>
-                <li><code>complete</code>: fires once, when the shopper finishes. It has the same payload as <code>change</code>. Then go to step 3.</li>
-                <li><code>resize</code>: <code>{uuid, height}</code>. The height is 800 while the shopper selects, and stays 800 after completion. If the widget opens already expired, canceled or completed, it is the height of that message.</li>
-                <li>The widget sends only the target height, not the steps in between. To animate the change, put <code>transition: height 500ms ease-in-out</code> on the iframe. Start it at <code>height: 800px</code>, with <code>scrolling="no"</code> and <code>overflow: hidden</code> so no scrollbar flashes while it resizes.</li>
-                <li>The payload is <code>{uuid, unitItems, pricing}</code>. <code>unitItems</code> has one entry per ticket. <code>pricing</code> is in cents and comes from the browser. Charge <code>booking.pricing.retail</code>.</li>
-            </ul>
-        </div>
-        <div class="example">
-            <p class="label">HTML + JavaScript, in your page</p>
-<pre><code>&lt;iframe id="octo-widget" src="<em>{widget.url}</em>" scrolling="no"
-        style="width:100%; height:800px; border:0; overflow:hidden; transition:height 500ms ease-in-out;"&gt;&lt;/iframe&gt;
-&lt;script&gt;
-    const widgetOrigin = new URL("<em>{widget.url}</em>").origin;
-    const iframe       = document.getElementById("octo-widget");
-
-    window.addEventListener("message", (event) =&gt; {
-        if (event.origin !== widgetOrigin) return;
-
-        const { type, version, payload } = event.data || {};
-        if (version !== "1") return;
-
-        if (type === "octo.widget.change")   updateSummary(payload);
-        if (type === "octo.widget.complete") onWidgetComplete(payload.uuid);
-        if (type === "octo.widget.resize")   iframe.style.height = payload.height + "px";
-    });
-&lt;/script&gt;</code></pre>
-        </div>
-    </section>
-
-    <section class="row" data-mode="redirect" hidden>
-        <div class="explain">
-            <p class="eyebrow">Step 2 &middot; browser</p>
-            <h2 id="send">Send the shopper to the widget</h2>
-            <p class="endpoint"><span class="method js">JS</span>window.location.href = widget.url</p>
-            <p>
-                Open it as a full page, not in an iframe. When the shopper finishes, the widget sends them to
-                <code>returnUrl?widgetUuid=<em>{uuid}</em></code>. Your existing query string is kept. Then go to step 3.
-            </p>
-        </div>
-        <div class="example">
-            <p class="label">JavaScript, in your page</p>
-<pre><code>window.location.href = "<em>{widget.url}</em>";</code></pre>
-        </div>
-    </section>
-
-    <section class="row">
-        <div class="explain">
-            <p class="eyebrow">Step 3a &middot; server</p>
-            <h2 id="result">Read the result</h2>
-            <p class="endpoint"><span class="method get">GET</span>/octo/widgets/{uuid}</p>
-            <p class="ref">Postman: <a href="https://www.postman.com/myticketpro/myticketpro-developers/request/w3okkxd/get-widgets">Get Widget</a></p>
-            <p>The widget is now <code>COMPLETED</code> and single use.</p>
-            <p data-booking="auto">
-                The <code>booking</code> is already held for <code>booking.expirationMinutes</code> (default 15, max 30)
-                from completion. Go to 3c.
-            </p>
-            <p data-booking="manual" hidden>Nothing is held yet. Go to 3b.</p>
-        </div>
-        <div class="example">
-<div class="code-tabs">
-    <div class="tabs" role="tablist">
-        <button type="button" role="tab" data-set-lang="curl">cURL</button>
-        <button type="button" role="tab" data-set-lang="node">Node.js</button>
-        <button type="button" role="tab" data-set-lang="php">PHP</button>
-        <button type="button" role="tab" data-set-lang="python">Python</button>
-        <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
-    </div>
-<pre data-lang="curl"><code>curl https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/widgets/019f46c8-6357-75d8-9a67-f87787566c67 \
-     -H "Authorization: Bearer $MTP_TOKEN"</code></pre>
-<pre data-lang="node" hidden><code>const result = await mtp("GET", `/widgets/${widgetUuid}`);
-// result.status === "COMPLETED"</code></pre>
-<pre data-lang="php" hidden><code>$result = mtp("GET", "/widgets/{$widgetUuid}");
-// $result["status"] === "COMPLETED"</code></pre>
-<pre data-lang="python" hidden><code>result = mtp("GET", f"/widgets/{widget_uuid}")
-# result["status"] == "COMPLETED"</code></pre>
-<pre data-lang="csharp" hidden><code>var result = await mtp.Send(HttpMethod.Get, $"widgets/{widgetUuid}");
-// (string)result["status"] == "COMPLETED"</code></pre>
-</div>
-        </div>
-    </section>
-
-    <section class="row" data-booking="manual" hidden>
-        <div class="explain">
-            <p class="eyebrow">Step 3b &middot; server</p>
-            <h2 id="book">Hold the seats</h2>
-            <p class="endpoint"><span class="method post">POST</span>/octo/bookings</p>
-            <p class="ref">Postman: <a href="https://www.postman.com/myticketpro/workspace/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea?entity=request-71ff36ae-cd23-431d-b769-5c99d45cf791">Booking Reservation</a></p>
-            <p>
-                This creates the booking, on hold, with exactly what the shopper picked. Pass the <code>widgetUuid</code>.
-            </p>
-        </div>
-        <div class="example">
-<div class="code-tabs">
-    <div class="tabs" role="tablist">
-        <button type="button" role="tab" data-set-lang="curl">cURL</button>
-        <button type="button" role="tab" data-set-lang="node">Node.js</button>
-        <button type="button" role="tab" data-set-lang="php">PHP</button>
-        <button type="button" role="tab" data-set-lang="python">Python</button>
-        <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
-    </div>
-<pre data-lang="curl"><code>curl -X POST https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/bookings \
-     -H "Authorization: Bearer $MTP_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{
-         "productId": "product-123",
-         "optionId": "widget",
-         "availabilityId": "event-456",
-         "widgetUuid": "019f46c8-6357-75d8-9a67-f87787566c67"
-     }'</code></pre>
-<pre data-lang="node" hidden><code>const booking = await mtp("POST", "/bookings", {
-    productId,
-    optionId   : "widget",
-    availabilityId,
-    widgetUuid,
-});</code></pre>
-<pre data-lang="php" hidden><code>$booking = mtp("POST", "/bookings", [
-    "productId"      =&gt; $productId,
-    "optionId"       =&gt; "widget",
-    "availabilityId" =&gt; $availabilityId,
-    "widgetUuid"     =&gt; $widgetUuid,
-]);</code></pre>
-<pre data-lang="python" hidden><code>booking = mtp("POST", "/bookings", {
-    "productId":      product_id,
-    "optionId":       "widget",
-    "availabilityId": availability_id,
-    "widgetUuid":     widget_uuid,
-})</code></pre>
-<pre data-lang="csharp" hidden><code>var booking = await mtp.Send(HttpMethod.Post, "bookings", new
-{
-    productId,
-    optionId = "widget",
-    availabilityId,
-    widgetUuid,
-});</code></pre>
-</div>
-        </div>
-    </section>
-
-    <section class="row">
-        <div class="explain">
-            <p class="eyebrow">Step 3c &middot; server</p>
-            <h2 id="confirm">Confirm, after payment</h2>
-            <p class="endpoint"><span class="method post">POST</span>/octo/bookings/{uuid}/confirm</p>
-            <p class="ref">Postman: <a href="https://www.postman.com/myticketpro/workspace/myticketpro-developers/documentation/36371187-039c24c3-3e1c-4b18-bd9a-ca148cc13fea?entity=request-d8ad17fa-0a9e-46d4-a527-845618dfabbd">Booking Confirmation</a></p>
-            <p>
-                Confirm before the hold expires. Charge <code>booking.pricing.retail</code>. All four <code>contact</code>
-                fields are required. The tickets are emailed to <code>emailAddress</code>.
-            </p>
-        </div>
-        <div class="example">
-<div class="code-tabs">
-    <div class="tabs" role="tablist">
-        <button type="button" role="tab" data-set-lang="curl">cURL</button>
-        <button type="button" role="tab" data-set-lang="node">Node.js</button>
-        <button type="button" role="tab" data-set-lang="php">PHP</button>
-        <button type="button" role="tab" data-set-lang="python">Python</button>
-        <button type="button" role="tab" data-set-lang="csharp">ASP.NET</button>
-    </div>
-<pre data-lang="curl"><code>curl -X POST https://<span class="host-api">api.sandbox.myticketpro.app</span>/octo/bookings/019f46c8-6357-75d8-9a67-f87787566c67/confirm \
-     -H "Authorization: Bearer $MTP_TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{
-         "resellerReference": "ORDER-1001",
-         "contact": {
-             "firstName": "John",
-             "lastName": "Smith",
-             "emailAddress": "john.smith@example.com",
-             "phoneNumber": "+15551234567"
-         }
-     }'</code></pre>
-<pre data-lang="node" hidden><code>const bookingUuid = result.booking?.uuid ?? booking.uuid;
-
-await mtp("POST", `/bookings/${bookingUuid}/confirm`, {
-    resellerReference : "ORDER-1001",
-    contact           : {
-        firstName    : "John",
-        lastName     : "Smith",
-        emailAddress : "john.smith@example.com",
-        phoneNumber  : "+15551234567",
-    },
-});</code></pre>
-<pre data-lang="php" hidden><code>$bookingUuid = $result["booking"]["uuid"] ?? $booking["uuid"];
-
-mtp("POST", "/bookings/{$bookingUuid}/confirm", [
-    "resellerReference" =&gt; "ORDER-1001",
-    "contact"           =&gt; [
-        "firstName"    =&gt; "John",
-        "lastName"     =&gt; "Smith",
-        "emailAddress" =&gt; "john.smith@example.com",
-        "phoneNumber"  =&gt; "+15551234567",
-    ],
-]);</code></pre>
-<pre data-lang="python" hidden><code>booking_uuid = (result.get("booking") or booking)["uuid"]
-
-mtp("POST", f"/bookings/{booking_uuid}/confirm", {
-    "resellerReference": "ORDER-1001",
-    "contact": {
-        "firstName":    "John",
-        "lastName":     "Smith",
-        "emailAddress": "john.smith@example.com",
-        "phoneNumber":  "+15551234567",
-    },
-})</code></pre>
-<pre data-lang="csharp" hidden><code>var bookingUuid = (string?)result["booking"]?["uuid"] ?? (string)booking["uuid"]!;
-
-await mtp.Send(HttpMethod.Post, $"bookings/{bookingUuid}/confirm", new
-{
-    resellerReference = "ORDER-1001",
-    contact = new
-    {
-        firstName    = "John",
-        lastName     = "Smith",
-        emailAddress = "john.smith@example.com",
-        phoneNumber  = "+15551234567",
-    },
-});</code></pre>
-</div>
-        </div>
-    </section>
-
-    <section class="try">
-    <p class="eyebrow">Test</p>
-    <h2 id="try">Try it</h2>
-
-    <p>Run the example project with your sandbox token. It lists products, creates the widget from your server and confirms the booking. To watch a single widget, paste its uuid from <code>POST /octo/widgets</code> into a demo.</p>
-
-    <div class="cards">
-        <a href="https://github.com/MyTicketPro/integration/blob/main/nodejs/README.md">
-            <strong>Example project</strong>
-            <span>Node.js, the iframe flow from start to finish. Needs a sandbox token.</span>
-        </a>
-        <a href="postmessage/index.html" data-mode="postmessage">
-            <strong>Iframe demo</strong>
-            <span>Paste a widget uuid. It embeds the widget and logs every message as it arrives.</span>
-        </a>
-        <a href="redirect/index.html" data-mode="redirect" hidden>
-            <strong>Redirect demo</strong>
-            <span>Paste the uuid of a widget whose <code>returnUrl</code> is the demo's return page. It opens the widget as a full page, then brings you back.</span>
-        </a>
-    </div>
-    </section>
-    </div>
-
-</main>
-</div>
-
-<script>
-    // Flow and language each decide which blocks show. `#redirect` or `#postmessage` in the link preselects a flow.
-    const RETURN_URL = {
-        postmessage : "null",
-        redirect    : "\"https://your.site/return\"",
-    };
-    const LANGUAGES  = ["curl", "node", "php", "python", "csharp"];
-
-    function applyMode(mode) {
-
-        document.querySelectorAll("[data-mode]").forEach(element => {
-            element.hidden = element.dataset.mode !== mode;
-        });
-
-        // each language spells null its own way (null, None, (string?)null), kept on the span
-        document.querySelectorAll(".return-url").forEach(element => {
-            element.textContent = mode === "postmessage" ? element.dataset.null : RETURN_URL.redirect;
-        });
-
-        document.getElementById("mode-" + mode).checked = true;
-        remember("widget-guide-mode", mode);
-        updateGate();
-    }
-
-    function applyLanguage(lang) {
-
-        document.querySelectorAll("[data-lang]").forEach(element => {
-            element.hidden = element.dataset.lang !== lang;
-        });
-
-        document.querySelectorAll("[data-set-lang]").forEach(button => {
-            button.setAttribute("aria-selected", String(button.dataset.setLang === lang));
-        });
-
-        remember("widget-guide-lang", lang);
-    }
-
-    function remember(key, value) {
-
-        try {
-            localStorage.setItem(key, value);
-        }
-        catch (error) {
-            // Storage blocked: the choice just isn't remembered.
-        }
-    }
-
-    function recall(key) {
-
-        try {
-            return localStorage.getItem(key);
-        }
-        catch (error) {
-            return null;
-        }
-    }
-
-    function initialMode() {
-
-        const fromHash = location.hash.slice(1);
-        const saved    = recall("widget-guide-mode");
-
-        if (RETURN_URL[fromHash]) {
-            return fromHash;
-        }
-
-        return RETURN_URL[saved] ? saved : null;
-    }
-
-    function initialLanguage() {
-
-        const saved = recall("widget-guide-lang");
-
-        return LANGUAGES.includes(saved) ? saved : "curl";
-    }
-
-    document.querySelectorAll("input[name=mode]").forEach(input => {
-        input.addEventListener("change", () => applyMode(input.value));
-    });
-
-    // One click on any example's tab switches every example on the page.
-    // Examples differ in length, so switching changes the height of everything above.
-    // Scroll by the difference to keep the clicked tab where it was.
-    document.querySelectorAll("[data-set-lang]").forEach(button => {
-        button.addEventListener("click", () => {
-
-            const before = button.getBoundingClientRect().top;
-
-            applyLanguage(button.dataset.setLang);
-
-            window.scrollBy(0, button.getBoundingClientRect().top - before);
-        });
-    });
-
-    function applyBooking(booking) {
-
-        document.querySelectorAll("[data-booking]").forEach(element => {
-            element.hidden = element.dataset.booking !== booking;
-        });
-
-        document.getElementById("booking-" + booking).checked = true;
-        remember("widget-guide-booking", booking);
-        updateGate();
-    }
-
-    // The guide stays hidden until both questions are answered.
-    function updateGate() {
-
-        const ready = document.querySelector("input[name=mode]:checked")
-                      && document.querySelector("input[name=booking]:checked");
-
-        document.getElementById("guide").hidden     = !ready;
-        document.getElementById("toc-guide").hidden = !ready;
-        document.getElementById("gate-note").hidden = !!ready;
-    }
-
-    document.querySelectorAll("input[name=booking]").forEach(input => {
-        input.addEventListener("change", () => applyBooking(input.value));
-    });
-
-    // Environment: rewrites every marked host and the token placeholder.
-    const ENVIRONMENTS = {
-        sandbox    : { api: "api.sandbox.myticketpro.app", widget: "widget.sandbox.myticketpro.app", token: "your-sandbox-token" },
-        production : { api: "api.myticketpro.app",         widget: "widget.myticketpro.app",         token: "your-production-token" },
-    };
-
-    function applyEnvironment(env) {
-
-        const hosts = ENVIRONMENTS[env];
-
-        document.querySelectorAll(".host-api").forEach(element => element.textContent = hosts.api);
-        document.querySelectorAll(".host-widget").forEach(element => element.textContent = hosts.widget);
-        document.querySelectorAll(".env-token").forEach(element => element.textContent = hosts.token);
-
-        document.querySelectorAll("[data-env]").forEach(element => {
-            element.hidden = element.dataset.env !== env;
-        });
-
-        document.getElementById("env").value = env;
-        remember("widget-guide-env", env);
-    }
-
-    document.getElementById("env").addEventListener("change", event => applyEnvironment(event.target.value));
-
-    // Copy buttons. innerText skips hidden parts, so a copy matches exactly what the reader sees.
-    function copyCode(button, code) {
-
-        const text = code.innerText.replace(/\n$/, "");
-
-        const confirm = () => {
-            button.textContent = "Copied";
-            button.classList.add("done");
-
-            setTimeout(() => {
+
+        <script>
+            // Code blocks are indented to match the HTML around them. A <pre> shows every space, so remove
+            // that indentation, the newline after <code> and the one before </code> before anything reads the code.
+            // The docs MCP (api/class/mcp/github.inc) does the same for its copy.
+            function dedent(code) {
+
+                const text = code.textContent;
+                if (!text.startsWith("\n")) return;
+
+                const lines  = text.slice(1).split("\n").filter(line => line.trim());
+                const indent = Math.min(...lines.map(line => line.match(/^ */)[0].length));
+
+                // A line can start in one text node and continue in the next (around a <span>),
+                // so count the spaces still to remove across nodes.
+                const nodes = [];
+                const walker = document.createTreeWalker(code, NodeFilter.SHOW_TEXT);
+                while (walker.nextNode()) nodes.push(walker.currentNode);
+
+                let first = true;
+                let toRemove = 0;
+
+                for (const node of nodes) {
+                    let out = "";
+                    for (const char of node.data) {
+                        if (first) {
+                            first = false;
+                            toRemove = indent;
+                            continue; // the newline after <code>
+                        }
+                        if (toRemove && char === " ") {
+                            toRemove--;
+                            continue;
+                        }
+                        toRemove = char === "\n" ? indent : 0;
+                        out += char;
+                    }
+                    node.data = out;
+                }
+
+                // the newline before </code>
+                const last = nodes.findLast(node => node.data);
+                if (last) last.data = last.data.replace(/\n$/, "");
+            }
+            document.querySelectorAll("pre > code").forEach(dedent);
+
+            // Flow and language each decide which blocks show. `#redirect` or `#postmessage` in the link preselects a flow.
+            const RETURN_URL = {
+                postmessage: "null",
+                redirect: "\"https://your.site/return\"",
+            };
+            const LANGUAGES = ["curl", "node", "php", "python", "csharp"];
+
+            function applyMode(mode) {
+
+                document.querySelectorAll("[data-mode]").forEach(element => {
+                    element.hidden = element.dataset.mode !== mode;
+                });
+
+                // each language spells null its own way (null, None, (string?)null), kept on the span
+                document.querySelectorAll(".return-url").forEach(element => {
+                    element.textContent = mode === "postmessage" ? element.dataset.null : RETURN_URL.redirect;
+                });
+
+                document.getElementById("mode-" + mode).checked = true;
+                remember("widget-guide-mode", mode);
+                updateGate();
+            }
+
+            function applyLanguage(lang) {
+
+                document.querySelectorAll("[data-lang]").forEach(element => {
+                    element.hidden = element.dataset.lang !== lang;
+                });
+
+                document.querySelectorAll("[data-set-lang]").forEach(button => {
+                    button.setAttribute("aria-selected", String(button.dataset.setLang === lang));
+                });
+
+                remember("widget-guide-lang", lang);
+            }
+
+            function remember(key, value) {
+
+                try {
+                    localStorage.setItem(key, value);
+                }
+                catch (error) {
+                    // Storage blocked: the choice just isn't remembered.
+                }
+            }
+
+            function recall(key) {
+
+                try {
+                    return localStorage.getItem(key);
+                }
+                catch (error) {
+                    return null;
+                }
+            }
+
+            function initialMode() {
+
+                const fromHash = location.hash.slice(1);
+                const saved = recall("widget-guide-mode");
+
+                if (RETURN_URL[fromHash]) {
+                    return fromHash;
+                }
+
+                return RETURN_URL[saved] ? saved : null;
+            }
+
+            function initialLanguage() {
+
+                const saved = recall("widget-guide-lang");
+
+                return LANGUAGES.includes(saved) ? saved : "curl";
+            }
+
+            document.querySelectorAll("input[name=mode]").forEach(input => {
+                input.addEventListener("change", () => applyMode(input.value));
+            });
+
+            // One click on any example's tab switches every example on the page.
+            // Examples differ in length, so switching changes the height of everything above.
+            // Scroll by the difference to keep the clicked tab where it was.
+            document.querySelectorAll("[data-set-lang]").forEach(button => {
+                button.addEventListener("click", () => {
+
+                    const before = button.getBoundingClientRect().top;
+
+                    applyLanguage(button.dataset.setLang);
+
+                    window.scrollBy(0, button.getBoundingClientRect().top - before);
+                });
+            });
+
+            function applyBooking(booking) {
+
+                document.querySelectorAll("[data-booking]").forEach(element => {
+                    element.hidden = element.dataset.booking !== booking;
+                });
+
+                document.getElementById("booking-" + booking).checked = true;
+                remember("widget-guide-booking", booking);
+                updateGate();
+            }
+
+            // The guide stays hidden until both questions are answered.
+            function updateGate() {
+
+                const ready = document.querySelector("input[name=mode]:checked")
+                    && document.querySelector("input[name=booking]:checked");
+
+                document.getElementById("guide").hidden = !ready;
+                document.getElementById("toc-guide").hidden = !ready;
+                document.getElementById("gate-note").hidden = !!ready;
+            }
+
+            document.querySelectorAll("input[name=booking]").forEach(input => {
+                input.addEventListener("change", () => applyBooking(input.value));
+            });
+
+            // Environment: rewrites every marked host and the token placeholder.
+            const ENVIRONMENTS = {
+                sandbox: { api: "api.sandbox.myticketpro.app", widget: "widget.sandbox.myticketpro.app", token: "your-sandbox-token" },
+                production: { api: "api.myticketpro.app", widget: "widget.myticketpro.app", token: "your-production-token" },
+            };
+
+            function applyEnvironment(env) {
+
+                const hosts = ENVIRONMENTS[env];
+
+                document.querySelectorAll(".host-api").forEach(element => element.textContent = hosts.api);
+                document.querySelectorAll(".host-widget").forEach(element => element.textContent = hosts.widget);
+                document.querySelectorAll(".env-token").forEach(element => element.textContent = hosts.token);
+
+                document.querySelectorAll("[data-env]").forEach(element => {
+                    element.hidden = element.dataset.env !== env;
+                });
+
+                document.getElementById("env").value = env;
+                remember("widget-guide-env", env);
+            }
+
+            document.getElementById("env").addEventListener("change", event => applyEnvironment(event.target.value));
+
+            // Copy buttons. innerText skips hidden parts, so a copy matches exactly what the reader sees.
+            function copyCode(button, code) {
+
+                const text = code.innerText.replace(/\n$/, "");
+
+                const confirm = () => {
+                    button.textContent = "Copied";
+                    button.classList.add("done");
+
+                    setTimeout(() => {
+                        button.textContent = "Copy";
+                        button.classList.remove("done");
+                    }, 1500);
+                };
+
+                const selectInstead = () => {
+                    const range = document.createRange();
+                    range.selectNodeContents(code);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                };
+
+                if (!navigator.clipboard) {
+                    selectInstead();
+                    return;
+                }
+
+                navigator.clipboard.writeText(text).then(confirm, selectInstead);
+            }
+
+            function makeCopyButton() {
+
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "copy";
                 button.textContent = "Copy";
-                button.classList.remove("done");
-            }, 1500);
-        };
 
-        const selectInstead = () => {
-            const range = document.createRange();
-            range.selectNodeContents(code);
-            window.getSelection().removeAllRanges();
-            window.getSelection().addRange(range);
-        };
+                return button;
+            }
 
-        if (!navigator.clipboard) {
-            selectInstead();
-            return;
-        }
+            document.querySelectorAll(".code-tabs").forEach(panel => {
 
-        navigator.clipboard.writeText(text).then(confirm, selectInstead);
-    }
+                const button = makeCopyButton();
 
-    function makeCopyButton() {
+                button.addEventListener("click", () => {
+                    const visible = [...panel.querySelectorAll("pre")].find(pre => !pre.hidden);
+                    copyCode(button, visible.querySelector("code"));
+                });
 
-        const button       = document.createElement("button");
-        button.type        = "button";
-        button.className   = "copy";
-        button.textContent = "Copy";
+                panel.querySelector(".tabs").appendChild(button);
+            });
 
-        return button;
-    }
+            document.querySelectorAll(".example > pre").forEach(pre => {
 
-    document.querySelectorAll(".code-tabs").forEach(panel => {
+                const button = makeCopyButton();
 
-        const button = makeCopyButton();
+                button.addEventListener("click", () => copyCode(button, pre.querySelector("code")));
+                pre.appendChild(button);
+            });
 
-        button.addEventListener("click", () => {
-            const visible = [...panel.querySelectorAll("pre")].find(pre => !pre.hidden);
-            copyCode(button, visible.querySelector("code"));
-        });
+            // Highlight the table of contents entry for the section being read.
+            const tocLinks = [...document.querySelectorAll(".toc a[href^='#']")];
+            const observer = new IntersectionObserver(entries => {
 
-        panel.querySelector(".tabs").appendChild(button);
-    });
+                entries.filter(entry => entry.isIntersecting).forEach(entry => {
+                    tocLinks.forEach(link => link.classList.toggle("active", link.getAttribute("href") === "#" + entry.target.id));
+                });
+            }, { rootMargin: "0px 0px -70% 0px" });
 
-    document.querySelectorAll(".example > pre").forEach(pre => {
+            tocLinks.forEach(link => {
+                const target = document.querySelector(link.getAttribute("href"));
+                if (target) {
+                    observer.observe(target);
+                }
+            });
 
-        const button = makeCopyButton();
+            applyEnvironment(ENVIRONMENTS[recall("widget-guide-env")] ? recall("widget-guide-env") : "sandbox");
+            // Nothing is preselected on a first visit. A saved or #linked answer is restored.
+            const savedMode = initialMode();
+            const savedBooking = recall("widget-guide-booking");
 
-        button.addEventListener("click", () => copyCode(button, pre.querySelector("code")));
-        pre.appendChild(button);
-    });
+            document.querySelectorAll("[data-mode], [data-booking]").forEach(element => element.hidden = true);
 
-    // Highlight the table of contents entry for the section being read.
-    const tocLinks = [...document.querySelectorAll(".toc a[href^='#']")];
-    const observer = new IntersectionObserver(entries => {
+            if (savedMode) {
+                applyMode(savedMode);
+            }
 
-        entries.filter(entry => entry.isIntersecting).forEach(entry => {
-            tocLinks.forEach(link => link.classList.toggle("active", link.getAttribute("href") === "#" + entry.target.id));
-        });
-    }, { rootMargin: "0px 0px -70% 0px" });
+            if (savedBooking === "auto" || savedBooking === "manual") {
+                applyBooking(savedBooking);
+            }
 
-    tocLinks.forEach(link => {
-        const target = document.querySelector(link.getAttribute("href"));
-        if (target) {
-            observer.observe(target);
-        }
-    });
+            updateGate();
+            applyLanguage(initialLanguage());
+        </script>
+    </body>
 
-    applyEnvironment(ENVIRONMENTS[recall("widget-guide-env")] ? recall("widget-guide-env") : "sandbox");
-    // Nothing is preselected on a first visit. A saved or #linked answer is restored.
-    const savedMode    = initialMode();
-    const savedBooking = recall("widget-guide-booking");
-
-    document.querySelectorAll("[data-mode], [data-booking]").forEach(element => element.hidden = true);
-
-    if (savedMode) {
-        applyMode(savedMode);
-    }
-
-    if (savedBooking === "auto" || savedBooking === "manual") {
-        applyBooking(savedBooking);
-    }
-
-    updateGate();
-    applyLanguage(initialLanguage());
-</script>
-</body>
 </html>
