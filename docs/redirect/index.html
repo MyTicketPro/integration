@@ -33,7 +33,7 @@ Authorization: Bearer <em>&lt;token&gt;</em>
         <input id="uuid" type="text" placeholder="01a0af92-... (or the whole widget url)" autofocus>
         <button id="open" type="button">Open widget</button>
         <p class="hint">Single use. Widget origin: <code id="origin-hint"></code></p>
-        <p class="hint">No uuid yet? <a href="../mint/index.html?mode=redirect">Mint one</a>, with the return page filled in.</p>
+        <p class="hint">No uuid yet? Follow <a href="../index.html#create">Create the widget</a> in the guide with the <code>returnUrl</code> shown above, and paste the <code>uuid</code> it returns.</p>
     </div>
 
     <h2>Return</h2>
@@ -54,7 +54,7 @@ Authorization: Bearer <em>&lt;token&gt;</em>
     const input = document.getElementById("uuid");
     const open  = document.getElementById("open");
 
-    // The minter links here with ?uuid= already filled in.
+    // A link can pass ?uuid= to fill it in.
     input.value = new URLSearchParams(location.search).get("uuid") || "";
 
     const go = () => {

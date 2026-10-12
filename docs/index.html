@@ -1535,24 +1535,20 @@ await mtp.Send(HttpMethod.Post, $"bookings/{bookingUuid}/confirm", new
     <p class="eyebrow">Test</p>
     <h2 id="try">Try it</h2>
 
-    <p>Mint a test widget, then open it in the demo. The minter links straight into it.</p>
+    <p>Run the example project with your sandbox token. It lists products, creates the widget from your server and confirms the booking. To watch a single widget, paste its uuid from <code>POST /octo/widgets</code> into a demo.</p>
 
     <div class="cards">
-        <a href="mint/index.html?mode=postmessage" data-mode="postmessage">
-            <strong>1. Mint a widget</strong>
-            <span>Creates a sandbox widget for the iframe flow.</span>
+        <a href="https://github.com/MyTicketPro/integration/blob/main/nodejs/README.md">
+            <strong>Example project</strong>
+            <span>Node.js, the iframe flow from start to finish. Needs a sandbox token.</span>
         </a>
         <a href="postmessage/index.html" data-mode="postmessage">
-            <strong>2. Iframe demo</strong>
-            <span>Embeds it and logs every message as it arrives.</span>
-        </a>
-        <a href="mint/index.html?mode=redirect" data-mode="redirect" hidden>
-            <strong>1. Mint a widget</strong>
-            <span>Creates a widget with the demo's return page as <code>returnUrl</code>.</span>
+            <strong>Iframe demo</strong>
+            <span>Paste a widget uuid. It embeds the widget and logs every message as it arrives.</span>
         </a>
         <a href="redirect/index.html" data-mode="redirect" hidden>
-            <strong>2. Redirect demo</strong>
-            <span>Opens the widget as a full page, then brings you back.</span>
+            <strong>Redirect demo</strong>
+            <span>Paste the uuid of a widget whose <code>returnUrl</code> is the demo's return page. It opens the widget as a full page, then brings you back.</span>
         </a>
     </div>
     </section>

@@ -23,17 +23,12 @@
 
         <h2>Paste a widget uuid</h2>
 
-<pre><code>POST https://api.sandbox.myticketpro.app/octo/widgets
-Authorization: Bearer <em>&lt;token&gt;</em>
-
-{"productId": "...", "optionId": "widget", "availabilityId": "...", "returnUrl": null}</code></pre>
-
         <div class="card">
             <label for="uuid">Widget uuid</label>
             <input id="uuid" type="text" placeholder="01a0af92-... (or paste the whole widget url)" autofocus>
             <button id="load" type="button">Load the widget</button>
             <p class="hint">Single use. Widget origin: <code id="origin-hint"></code></p>
-            <p class="hint">No uuid yet? <a href="../mint/index.html?mode=postmessage">Mint one</a>.</p>
+            <p class="hint">No uuid yet? Follow <a href="../index.html#create">Create the widget</a> in the guide with <code>"returnUrl": null</code>, and paste the <code>uuid</code> it returns.</p>
         </div>
 
     </section>
