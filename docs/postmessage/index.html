@@ -70,11 +70,11 @@ window.addEventListener("message", event =&gt; {
     const { type, payload } = event.data || {};
 
     if (type === "octo.widget.change") {
-        render(payload);                  // {uuid, unitItems, pricing}
+        render(payload);                  // {uuid, unitItems, displayPricing}
     }
 
     if (type === "octo.widget.complete") {
-        submitOrder(payload);             // {uuid, unitItems, pricing}
+        submitOrder(payload);             // {uuid, unitItems, displayPricing}
     }
 
     if (type === "octo.widget.resize") {
@@ -179,12 +179,17 @@ window.addEventListener("message", event =&gt; {
 
     function write(type, payload, done) {
 
-        const p      = payload || {};
-        const totals = p.pricing !== undefined
-                       ? {quantity: (p.unitItems || []).length, retail: (p.pricing || {}).retail}
-                       : (p.totals || {});
+        const p       = payload || {};
+        const pricing = p.displayPricing || {};
+        const totals  = p.displayPricing !== undefined
+                        ? {
+                              quantity: (p.unitItems || []).length,
+                              retail  : (pricing.retail / 10 ** pricing.currencyPrecision).toFixed(pricing.currencyPrecision),
+                              currency: pricing.currency,
+                          }
+                        : {quantity: (p.totals || {}).quantity, retail: (p.totals || {}).display_retail, currency: p.currency};
 
-        note(type, "quantity " + show(totals.quantity) + ", retail " + show(totals.retail), done);
+        note(type, "quantity " + show(totals.quantity) + ", retail " + show(totals.retail) + " " + show(totals.currency), done);
 
         document.getElementById("payload").textContent = JSON.stringify(payload, null, 4);
     }

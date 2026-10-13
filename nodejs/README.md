@@ -1,6 +1,6 @@
 # MyTicketPro Widget Example (Node.js)
 
-A reference implementation demonstrating how to sell tickets using the MyTicketPro embedded widget. This application implements the primary integration pattern outlined in the [Integration Guide](https://myticketpro.github.io/integration/): an `iframe` embedding strategy with `postMessage` event handling and automatic holds (`createBooking: true`).
+A reference implementation demonstrating how to sell tickets using the MyTicketPro embedded widget. This application implements the primary integration pattern outlined in the [Integration Guide](https://myticketpro.github.io/integration/): an `iframe` embedding strategy with `postMessage` event handling and automatic holds (`createBookingOnComplete: true`).
 
 ## Application Flow
 
@@ -23,11 +23,11 @@ This implementation uses standard [OCTO API](https://www.octo.travel/) domain en
 | **Availability** | Specific date/time slot for a product | `2026-11-01T20:00:00-05:00` |
 | **Widget** | Embedded seat/ticket selection interface | `widget.uuid`, `widget.url` |
 | **Unit Item** | Individual ticket instance | `unitItems` array |
-| **Pricing** | Monetary amounts represented in cents | `9000` ($90.00 USD) |
+| **Pricing** | Amounts in the currency's smallest unit (`currencyPrecision`). `pricing` is the booking currency (USD); `displayPricing` is what the shopper sees in the widget | `9000` ($90.00 USD) |
 | **Booking** | Ticket reservation status (`ON_HOLD` or `CONFIRMED`) | `booking.uuid` |
 | **Contact** | Ticket holder details | `firstName`, `emailAddress` |
 
-> **Note on Holds:** Passing `createBooking: true` automatically creates a temporary hold upon checkout completion. A separate `POST /octo/bookings` call is not required.
+> **Note on Holds:** Passing `createBookingOnComplete: true` automatically creates a temporary hold upon checkout completion. A separate `POST /octo/bookings` call is not required.
 
 ## Architecture & Security
 
@@ -78,7 +78,7 @@ To switch to production:
 This example covers the recommended **embedded iframe** flow with **automatic holds**. The OCTO specification also supports:
 
 * **Redirect Flow:** Directing users to `widget.url` with a `returnUrl` callback.
-* **Manual Holds:** Explicitly holding inventory using `createBooking: false` followed by `POST /octo/bookings`.
+* **Manual Holds:** Explicitly holding inventory using `createBookingOnComplete: false` followed by `POST /octo/bookings`.
 
 Refer to the [Integration Guide](https://myticketpro.github.io/integration/) for detailed implementations of alternative patterns.
 

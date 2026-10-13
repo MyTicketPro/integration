@@ -965,15 +965,15 @@
                                 <label>
                                     <input type="radio" name="booking" id="booking-auto" value="auto">
                                     <span><strong>Yes, hold them automatically <code
-                                                class="flag">createBooking: true</code></strong>Recommended. Right after
+                                                class="flag">createBookingOnComplete: true</code></strong>Recommended. Right after
                                         the shopper completes their selection, the seats are taken out of inventory for
-                                        <code>booking.expirationMinutes</code> (15 minutes by default). Your server only
+                                        <code>bookingRequest.expirationMinutes</code> (15 minutes by default). Your server only
                                         confirms.</span>
                                 </label>
                                 <label>
                                     <input type="radio" name="booking" id="booking-manual" value="manual">
                                     <span><strong>No, my server will hold them <code
-                                                class="flag">createBooking: false</code></strong>Nothing is taken out of
+                                                class="flag">createBookingOnComplete: false</code></strong>Nothing is taken out of
                                         inventory when the shopper completes their selection. Your server holds the
                                         seats with an extra call, then confirms.</span>
                                 </label>
@@ -985,14 +985,14 @@
                         <ol>
                             <li>The shopper selects their seats in the widget.</li>
                             <li>Right after the shopper completes their selection, the seats are taken out of inventory
-                                for 15 minutes (<code>booking.expirationMinutes</code>) <span
+                                for 15 minutes (<code>bookingRequest.expirationMinutes</code>) <span
                                     class="status">ON_HOLD</span></li>
                             <li>You charge the shopper and confirm the booking (step 3c) <span
                                     class="status">CONFIRMED</span></li>
                             <li class="bad">If it isn&rsquo;t confirmed in time, the seats are released <span
                                     class="status">EXPIRED</span></li>
                         </ol>
-                        <p class="foot">Held 15 minutes by default (<code>booking.expirationMinutes</code>, 1&ndash;30).
+                        <p class="foot">Held 15 minutes by default (<code>bookingRequest.expirationMinutes</code>, 1&ndash;30).
                             Exact deadline: <code>booking.utcExpiresAt</code>.</p>
                     </div>
                     <div class="timeline" data-booking="manual" hidden>
@@ -1385,25 +1385,25 @@
                                                 <code>https://</code>. We add <code>?widgetUuid=</code> to it.</td>
                                         </tr>
                                         <tr>
-                                            <td><code>createBooking</code></td>
+                                            <td><code>createBookingOnComplete</code></td>
                                             <td>No</td>
                                             <td>Default <code>true</code>. Set by "Should we automatically hold the
                                                 seats for you?" above.</td>
                                         </tr>
                                         <tr>
-                                            <td><code>booking.expirationMinutes</code></td>
+                                            <td><code>bookingRequest.expirationMinutes</code></td>
                                             <td>No</td>
                                             <td>How long those seats are held after the shopper finishes. Default 15,
                                                 max 30.</td>
                                         </tr>
                                         <tr>
-                                            <td><code>booking.uuid</code></td>
+                                            <td><code>bookingRequest.uuid</code></td>
                                             <td>No</td>
                                             <td>Your own uuid for the booking. Default: the widget <code>uuid</code>.
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><code>booking.notes</code></td>
+                                            <td><code>bookingRequest.notes</code></td>
                                             <td>No</td>
                                             <td>Free text saved on the booking.</td>
                                         </tr>
@@ -1434,7 +1434,30 @@
                                         <tr>
                                             <td><code>currency</code></td>
                                             <td>No</td>
-                                            <td>Only <code>"USD"</code>.</td>
+                                            <td>The booking currency. Only <code>"USD"</code>. The booking and every
+                                                <code>pricing</code> object are in it.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>displayCurrency</code></td>
+                                            <td>No</td>
+                                            <td>The currency the shopper sees in the widget, ISO 4217, like
+                                                <code>"EUR"</code>. Default: <code>currency</code>. The widget messages
+                                                and <code>displayPricing</code> are in it.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>displayCurrencyExchangeRate</code></td>
+                                            <td>With <code>displayCurrency</code></td>
+                                            <td>Your rate, margin included: 1 <code>currency</code> = this many
+                                                <code>displayCurrency</code>, like <code>0.92</code>. Required when
+                                                <code>displayCurrency</code> is not <code>currency</code>, otherwise 1
+                                                or left out.</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>displayCurrencyFormat</code></td>
+                                            <td>No</td>
+                                            <td>How the currency is shown: <code>"symbol"</code> (default),
+                                                <code>"narrowSymbol"</code>, <code>"code"</code> or
+                                                <code>"name"</code>.</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1458,7 +1481,7 @@
                                              "productId": "product-123",
                                              "optionId": "widget",
                                              "availabilityId": "event-456",
-                                    <span data-booking="manual" hidden>         "createBooking": false,
+                                    <span data-booking="manual" hidden>         "createBookingOnComplete": false,
                                     </span>         "returnUrl": <span class="return-url" data-null="null">null</span>
                                          }'
                                 </code></pre>
@@ -1467,7 +1490,7 @@
                                         productId,
                                         optionId  : "widget",
                                         availabilityId,
-                                    <span data-booking="manual" hidden>    createBooking : false,
+                                    <span data-booking="manual" hidden>    createBookingOnComplete: false,
                                     </span>    returnUrl : <span class="return-url" data-null="null">null</span>,
                                     });
 
@@ -1478,7 +1501,7 @@
                                         "productId"      =&gt; $productId,
                                         "optionId"       =&gt; "widget",
                                         "availabilityId" =&gt; $availabilityId,
-                                    <span data-booking="manual" hidden>    "createBooking"  =&gt; false,
+                                    <span data-booking="manual" hidden>    "createBookingOnComplete" =&gt; false,
                                     </span>    "returnUrl"      =&gt; <span class="return-url" data-null="null">null</span>,
                                     ]);
 
@@ -1489,7 +1512,7 @@
                                         "productId":      product_id,
                                         "optionId":       "widget",
                                         "availabilityId": availability_id,
-                                    <span data-booking="manual" hidden>    "createBooking":  False,
+                                    <span data-booking="manual" hidden>    "createBookingOnComplete": False,
                                     </span>    "returnUrl":      <span class="return-url" data-null="None">None</span>,
                                     })
 
@@ -1501,7 +1524,7 @@
                                         productId,
                                         optionId  = "widget",
                                         availabilityId,
-                                    <span data-booking="manual" hidden>    createBooking = false,
+                                    <span data-booking="manual" hidden>    createBookingOnComplete = false,
                                     </span>    returnUrl = <span class="return-url" data-null="(string?)null">(string?)null</span>,
                                     });
 
@@ -1538,9 +1561,11 @@
                                     change, put <code>transition: height 500ms ease-in-out</code> on the iframe. Start
                                     it at <code>height: 800px</code>, with <code>scrolling="no"</code> and
                                     <code>overflow: hidden</code> so no scrollbar flashes while it resizes.</li>
-                                <li>The payload is <code>{uuid, unitItems, pricing}</code>. <code>unitItems</code> has
-                                    one entry per ticket. <code>pricing</code> is in cents and comes from the browser.
-                                    Charge <code>booking.pricing.retail</code>.</li>
+                                <li>The payload is <code>{uuid, unitItems, displayPricing}</code>. <code>unitItems</code>
+                                    has one entry per ticket. <code>displayPricing</code> is what the shopper sees, in
+                                    <code>displayCurrency</code>, in minor units (<code>retail / 10 **
+                                    currencyPrecision</code>). It comes from the browser, so show it but don't charge
+                                    it. Charge <code>booking.pricing.retail</code>.</li>
                             </ul>
                         </div>
                         <div class="example">
@@ -1609,9 +1634,11 @@
                             <p class="ref">Postman: <a
                                     href="https://www.postman.com/myticketpro/myticketpro-developers/request/w3okkxd/get-widgets">Get
                                     Widget</a></p>
-                            <p>The widget is now <code>COMPLETED</code> and single use.</p>
+                            <p>The widget is now <code>COMPLETED</code> and single use. Its <code>pricing</code> is
+                                in the booking currency, its <code>displayPricing</code> in the currency the shopper
+                                saw.</p>
                             <p data-booking="auto">
-                                The <code>booking</code> is already held for <code>booking.expirationMinutes</code>
+                                The <code>booking</code> is already held for <code>bookingRequest.expirationMinutes</code>
                                 (default 15, max 30)
                                 from completion. Go to 3c.
                             </p>

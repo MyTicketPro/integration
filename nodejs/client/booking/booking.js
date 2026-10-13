@@ -18,16 +18,14 @@ function showBooking(booking) {
 
     status.hidden = true;
 
-    // Prices are in cents and only USD is used, so 9000 is $90.00.
-    const retail = (booking.pricing.retail / 100).toFixed(2);
-
     // "2026-11-01T20:00:00-05:00" becomes "2026-11-01 20:00".
     const start = booking.availability.localDateTimeStart.slice(0, 16).replace('T', ' ');
 
     document.querySelector('#supplier-reference').textContent = booking.supplierReference;
     document.querySelector('#availability').textContent = start;
     document.querySelector('#unit-items').textContent = booking.unitItems.length;
-    document.querySelector('#retail').textContent = `$${retail}`;
+    // What the shopper paid. The booking is always in the booking currency (USD).
+    document.querySelector('#retail').textContent = formatPrice(booking.pricing);
     document.querySelector('#email-address').textContent = booking.contact.emailAddress;
     document.querySelector('#booking').hidden = false;
 
@@ -41,6 +39,15 @@ function showBooking(booking) {
             }
         }
     }
+}
+
+// Turns an OCTO pricing object into text, like "$90.00".
+// Amounts are whole numbers in the smallest unit: 9000 with currencyPrecision 2 is 90.00.
+function formatPrice(pricing) {
+
+    const amount = pricing.retail / Math.pow(10, pricing.currencyPrecision);
+
+    return amount.toLocaleString('en-US', { style: 'currency', currency: pricing.currency });
 }
 
 // fetch() gives back a response. This reads the JSON inside it.

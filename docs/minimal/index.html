@@ -109,11 +109,11 @@ window.addEventListener("message", event =&gt; {
     const { type, payload } = event.data || {};
 
     if (type === "octo.widget.change") {
-        render(payload);                  // {uuid, unitItems, pricing}; repeats, full state
+        render(payload);                  // {uuid, unitItems, displayPricing}; repeats, full state
     }
 
     if (type === "octo.widget.complete") {
-        submitOrder(payload);             // {uuid, unitItems, pricing}; once
+        submitOrder(payload);             // {uuid, unitItems, displayPricing}; once
     }
 
     if (type === "octo.widget.resize") {
@@ -214,18 +214,21 @@ window.addEventListener("message", event =&gt; {
 
         function show(payload) {
 
-            if (payload.pricing !== undefined) {
-                const pricing = payload.pricing || {};
+            // octo: displayPricing is in minor units of the display currency
+            if (payload.displayPricing !== undefined) {
+                const pricing = payload.displayPricing || {};
+                const retail  = ((pricing.retail || 0) / 10 ** (pricing.currencyPrecision || 0))
+                                .toFixed(pricing.currencyPrecision || 0);
 
                 document.getElementById("totals").textContent = payload.unitItems.length + " ticket(s), retail "
-                                                               + (pricing.retail || 0) + " (minor units)";
+                                                               + retail + " " + pricing.currency;
                 return;
             }
 
             const totals = payload.totals || {};
 
             document.getElementById("totals").textContent = "quantity " + totals.quantity
-                                                           + ", retail " + totals.retail;
+                                                           + ", retail " + totals.display_retail + " " + payload.currency;
         }
 
 

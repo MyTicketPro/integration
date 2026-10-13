@@ -56,10 +56,11 @@ function onWidgetMessage(event) {
     if (message.type === 'octo.widget.change') {
         logEvent(message, 'Selection changed. Updated the total.');
 
+        // displayPricing is the total the shopper sees in the widget, in the widget's display currency.
         const unitItems = message.payload.unitItems;
-        const retail = message.payload.pricing.retail / 100; // prices are in cents
+        const total = formatPrice(message.payload.displayPricing);
 
-        document.querySelector('#summary').textContent = `${unitItems.length} ticket(s), total $${retail.toFixed(2)}`;
+        document.querySelector('#summary').textContent = `${unitItems.length} ticket(s), total ${total}`;
     }
 
     // The shopper finished. MyTicketPro now holds the tickets,
@@ -148,6 +149,16 @@ function openBooking(booking) {
 
     // Show the confirmed booking on its own page.
     location.href = `/booking/?uuid=${booking.uuid}`;
+}
+
+
+// Turns an OCTO pricing object into text, like "$90.00".
+// Amounts are whole numbers in the smallest unit: 9000 with currencyPrecision 2 is 90.00.
+function formatPrice(pricing) {
+
+    const amount = pricing.retail / Math.pow(10, pricing.currencyPrecision);
+
+    return amount.toLocaleString('en-US', { style: 'currency', currency: pricing.currency });
 }
 
 

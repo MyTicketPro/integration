@@ -8,7 +8,9 @@ export async function createWidget(req, res) {
         optionId: 'widget',
         availabilityId: req.body.availabilityId,
         // Hold the tickets as soon as the shopper finishes, so we never call POST /octo/bookings ourselves.
-        createBooking: true,
+        createBookingOnComplete: true,
+        // The widget shows prices in USD. To show euros instead, add your own rate:
+        // displayCurrency: 'EUR', displayCurrencyExchangeRate: 0.92 (1 USD = 0.92 EUR).
         // No returnUrl: the widget sits in an iframe and talks with postMessage.
         returnUrl: null,
     });
